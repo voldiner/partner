@@ -17,7 +17,7 @@ class CreateInvoicesTable extends Migration
             $table->id();
 
             $table->integer('kod_atp')->comment('код перевізника з fxp');
-            $table->string('number')->unique()->comment('номер рахунку');
+            $table->string('number',30)->unique()->comment('номер рахунку');
             $table->date('date_invoice')->comment('дата рахунку');
             $table->integer('month_status')->comment('місяць для станом на');
             $table->integer('year_status')->comment('рік для станом на');
