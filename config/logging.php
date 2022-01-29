@@ -66,7 +66,17 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 14,
         ],
+        // -- my channels
+        'register' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/register.log'),
+            'level' => 'debug',
+        ],
 
+
+
+
+        // --------------
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

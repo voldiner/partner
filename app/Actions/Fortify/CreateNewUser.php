@@ -2,8 +2,11 @@
 
 namespace App\Actions\Fortify;
 
+use App\Mail\UserRegisterMessageForAdmin;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -48,6 +51,12 @@ class CreateNewUser implements CreatesNewUsers
                 'email' => $input['email'],
                 'password' => Hash::make($input['password']),
             ]);
+        $logMessage = 'User ' . $user->name . ' has successfully registered ID - ' . $user->id;
+
+        Log::channel('register')->debug($logMessage);
+
+        Mail::send(new UserRegisterMessageForAdmin($user->name, $user->id));
+
         return $user;
         // ------------------------------------
         //        return User::create([
