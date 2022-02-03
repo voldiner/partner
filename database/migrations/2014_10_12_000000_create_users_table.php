@@ -22,10 +22,10 @@ class CreateUsersTable extends Migration
             $table->rememberToken();
             $table->timestamps();
 
-            $table->integer('user_type')->default(1);
-            $table->boolean('is_active')->default(true);
-            $table->string('password_fxp',20)->default('test')->comment('тимчасовий пароль для створення користувача');
-            $table->integer('kod_fxp')->default(123)->comment('код перевізника з програми');
+            $table->integer('user_type');
+            $table->boolean('is_active');
+            $table->string('password_fxp',20)->comment('тимчасовий пароль для створення користувача');
+            $table->integer('kod_fxp')->unique()->comment('код перевізника з програми');
             $table->string('full_name')->nullable();
             $table->string('short_name')->nullable();
             $table->float('percent_retention_tariff',5,2)->nullable()->comment('процент відрахування з тарифу');
@@ -33,12 +33,12 @@ class CreateUsersTable extends Migration
             $table->float('percent_retention__insurer',5,2)->nullable()->comment('процент відрахування страховику');
             $table->float('percent_retention__baggage',5,2)->nullable()->comment('процент відрахування багаж');
             $table->integer('attribute')->nullable()->comment('Невідома ознака');
-            $table->boolean('collection')->nullable()->comment('договір інкасація');
+            $table->boolean('collection')->comment('договір інкасація');
             $table->string('insurer')->nullable()->comment('назва страховика');
             $table->string('surname')->nullable()->comment('прізвище імя по батькові');
             $table->string('identifier')->nullable()->comment('ідентифікаційний код');
             $table->string('address')->nullable()->comment('адреса');
-            $table->boolean('is_pdv')->default(1)->comment('ознака платника пдв');
+            $table->boolean('is_pdv')->comment('ознака платника пдв');
             $table->string('certificate')->nullable()->comment('номер свідоцтва');
             $table->string('certificate_tax')->nullable()->comment('індивідуальний податковий номер');
             $table->string('num_contract')->nullable()->comment('номер договора');

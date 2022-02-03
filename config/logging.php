@@ -72,7 +72,11 @@ return [
             'path' => storage_path('logs/register.log'),
             'level' => 'debug',
         ],
-
+        'download_users' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/download_users.log'),
+            'level' => 'debug',
+        ],
 
 
 
