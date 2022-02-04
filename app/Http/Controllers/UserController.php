@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserEditRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 use Str;
 use XBase\TableReader;
 
@@ -26,12 +28,13 @@ class UserController extends Controller
         if (!$user){
             return redirect()->route('welcome');
         }
+        $user->pdv_checkbox = $user->is_pdv ? 'checked' : '';
         return view('profile', compact('user'));
     }
 
-    public function update()
+    public function update(UserEditRequest $request)
     {
-
+        dd($request->all());
     }
 
 

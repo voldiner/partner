@@ -28,7 +28,7 @@
                 <!-- Add icons to the links using the .nav-icon class
                      with font-awesome or any other icon font library -->
                 <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link active">
+                    <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>
                             Dashboard
@@ -49,7 +49,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="../index3.html" class="nav-link">
+                            <a href="">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Dashboard v3</p>
                             </a>
@@ -58,8 +58,16 @@
                 </li>
                 <li class="nav-header">EXAMPLES</li>
                 <li class="nav-item">
-                    <a href="{{ route('users.edit', $user->id) }}" class="nav-link">
-                        {{--<i class="nav-icon fas fa-th"></i>--}}
+                    <a href="{{ route('home') }}" class="nav-link @if(Route::currentRouteName()== 'home') active @endif">
+                        <i class="nav-icon far fa-address-card"></i>
+                        <p>
+                            Домашня
+                            {{--<span class="right badge badge-danger">New</span>--}}
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('users.edit', $user->id) }}" class="nav-link @if(Route::currentRouteName()== 'users.edit') active @endif">
                         <i class="nav-icon far fa-address-card"></i>
                         <p>
                             Налаштування
