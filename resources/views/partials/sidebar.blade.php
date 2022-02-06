@@ -67,7 +67,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('users.edit', $user->id) }}" class="nav-link @if(Route::currentRouteName()== 'users.edit') active @endif">
+                    <a href="{{ route('users.edit', ['tab' => 1]) }}" class="nav-link @if(Route::currentRouteName()== 'users.edit') active @endif">
                         <i class="nav-icon far fa-address-card"></i>
                         <p>
                             Налаштування

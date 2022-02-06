@@ -77,7 +77,11 @@ return [
             'path' => storage_path('logs/download_users.log'),
             'level' => 'debug',
         ],
-
+        'edit_users' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/edit_users.log'),
+            'level' => 'debug',
+        ],
 
 
         // --------------

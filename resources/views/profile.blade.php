@@ -30,8 +30,8 @@
 
             <!-- Main content -->
             <section class="content">
-
                 <div class="container-fluid">
+                    @include('partials.status_message')
                     <div class="row">
                         <div class="col-md-3">
 
@@ -74,18 +74,18 @@
                             <div class="card">
                                 <div class="card-header p-2">
                                     <ul class="nav nav-pills">
-                                        <li class="nav-item"><a class="nav-link active" href="#activity"
+                                        <li class="nav-item"><a class="nav-link @if($tab == 1) active @endif" href="#activity"
                                                                 data-toggle="tab">Реквізити</a>
                                         </li>
-                                        <li class="nav-item"><a class="nav-link" href="#timeline"
+                                        <li class="nav-item"><a class="nav-link @if($tab == 2) active @endif" href="#timeline"
                                                                 data-toggle="tab">Змінити пароль</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="#settings"
+                                        <li class="nav-item"><a class="nav-link @if($tab == 3) active @endif" href="#settings"
                                                                 data-toggle="tab">Змінити Email</a></li>
                                     </ul>
                                 </div><!-- /.card-header -->
                                 <div class="card-body">
                                     <div class="tab-content">
-                                        <div class="tab-pane active" id="activity">
+                                        <div class="tab-pane @if($tab == 1) active @endif" id="activity">
                                             <form class="form-horizontal" method="post" action="{{ route('users.update', $user->id) }}">
                                                 @csrf
                                                 @method('PATCH')
@@ -128,8 +128,19 @@
                                                 </div>
                                                 <div class="custom-control custom-checkbox mb-3 mt-2">
                                                     <input class="custom-control-input" name="is_pdv" type="checkbox" id="is_pdv"
-                                                           value="checked" {{ old('is_pdv', $user->pdv_checkbox) }}>
+                                                           value="checked"
+                                                    @if ($errors->any())
+                                                         !!! {{ old('is_pdv') ? 'checked' : '' }}
+                                                    @else
+                                                          {{ $user->pdv_checkbox }}
+                                                    @endif
+                                                    >
                                                     <label for="is_pdv" class="custom-control-label">Платник ПДВ</label>
+                                                    @error('is_pdv')
+                                                    <div class="invalid-feedback" style="display: block;">
+                                                        {{ $message }}
+                                                    </div>
+                                                    @enderror
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-md-6">
@@ -263,7 +274,7 @@
                                                             <label for="telephone">Телефон</label>
                                                             <input type="text" name="telephone"
                                                                    class="form-control @error('telephone') is-invalid @enderror"
-                                                                   id="telephone" value="{{ $user->telephone }}"
+                                                                   id="telephone" value="{{ old('telephone', $user->telephone) }}"
                                                                    placeholder="телефон">
                                                             @error('telephone')
                                                             <div class="invalid-feedback">
@@ -284,32 +295,46 @@
                                             </form>
                                         </div>
                                         <!-- /.tab-pane -->
-                                        <div class="tab-pane" id="timeline">
-                                            <form class="form-horizontal">
+                                        <div class="tab-pane @if($tab == 2) active @endif" id="timeline">
+                                            <form class="form-horizontal" method="post" action="{{ route('changePassword') }}">
+                                                @csrf
                                                 <div class="form-group row">
-                                                    <label for="password" class="col-sm-3 col-form-label">Новий пароль</label>
+                                                    <label for="password" class="col-sm-3 col-form-label">Пароль</label>
                                                     <div class="col-sm-6">
                                                         <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" id="password"
                                                                placeholder="Пароль">
+                                                        @error('password')
+                                                        <div class="invalid-feedback" style="display: block;">
+                                                            {{ $message }}
+                                                        </div>
+                                                        @enderror
                                                     </div>
-                                                    @error('password')
-                                                    <div class="invalid-feedback">
-                                                        {{ $message }}
-                                                    </div>
-                                                    @enderror
                                                 </div>
                                                 <div class="form-group row">
-                                                    <label for="password_confirmation"
+                                                    <label for="new_password" class="col-sm-3 col-form-label">Новий пароль</label>
+                                                    <div class="col-sm-6">
+                                                        <input type="password" name="new_password" class="form-control @error('new_password') is-invalid @enderror" id="new_password"
+                                                               placeholder="Пароль">
+                                                        @error('new_password')
+                                                        <div class="invalid-feedback" style="display: block;">
+                                                            {{ $message }}
+                                                        </div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <label for="new_password_confirmation"
                                                            class="col-sm-3 col-form-label">Новий пароль повторно</label>
                                                     <div class="col-sm-6">
-                                                        <input type="password" class="form-control @error('password_confirmation') is-invalid @enderror" name="password_confirmation" id="password_confirmation"
+                                                        <input type="password" class="form-control @error('new_password_confirmation') is-invalid @enderror" name="new_password_confirmation" id="new_password_confirmation"
                                                                placeholder="Пароль">
+                                                        @error('new_password_confirmation')
+                                                        <div class="invalid-feedback" style="display: block;">
+                                                            {{ $message }}
+                                                        </div>
+                                                        @enderror
                                                     </div>
-                                                    @error('password_confirmation')
-                                                    <div class="invalid-feedback">
-                                                        {{ $message }}
-                                                    </div>
-                                                    @enderror
+
                                                 </div>
                                                 <div class="form-group row">
                                                     <div class="offset-sm-3 col-sm-10">
@@ -319,21 +344,41 @@
                                             </form>
                                         </div>
                                         <!-- /.tab-pane -->
-                                        <div class="tab-pane" id="settings">
+                                        <div class="tab-pane @if($tab == 3) active @endif"  id="settings">
                                             <p> Ваша поточна адреса електронної пошти <b>{{ $user->email }}</b></p>
-                                            <form class="form-horizontal">
+                                            <p>
+                                                Після зміни адреси електронної пошти Вам необхідно буде авторизуватися та
+                                                пройти процедуру її підтвердження
+                                            </p>
+                                            <form class="form-horizontal" method="post" action="{{ route('changeEmail') }}">
+                                                @csrf
                                                 <div class="form-group row">
                                                     <label for="Email"
                                                            class="col-sm-2 col-form-label">Новий Email</label>
                                                     <div class="col-sm-6">
                                                         <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" id="Email"
                                                                placeholder="Email" value="{{ old('email') }}">
+
+                                                        @error('email')
+                                                        <div class="invalid-feedback" style="display: block;">
+                                                            {{ $message }}
+                                                        </div>
+                                                        @enderror
                                                     </div>
-                                                    @error('email')
-                                                    <div class="invalid-feedback">
-                                                        {{ $message }}
+
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="password"
+                                                           class="col-sm-2 col-form-label">Пароль</label>
+                                                    <div class="col-sm-6">
+                                                        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Password">
+                                                        @error('password')
+                                                        <div class="invalid-feedback" style="display: block;">
+                                                            {{ $message }}
+                                                        </div>
+                                                        @enderror
                                                     </div>
-                                                    @enderror
                                                 </div>
                                                 <div class="form-group row">
                                                     <div class="offset-sm-2 col-sm-10">
@@ -373,18 +418,42 @@
 @section('my_script')
     <!-- AdminLTE for demo purposes -->
     <script src="{{ asset('dist/js/demo.js') }}"></script>
+    <script src="{{ asset('dist/js/url.min.js') }}"></script>
     <script>
         jQuery(function ($) {
-            // ---- платник ПДВ -----------
-            $('#is_pdv').click(function () {
-                if($(this).is(":checked")){
-                    $('#certificate').removeAttr('disabled');
-                    $('#certificate_tax').removeAttr('disabled')
-                }else{
-                    $('#certificate').attr('disabled', 'disabled');
-                    $('#certificate_tax').attr('disabled', 'disabled');
+            // ----- зміна параметрів url при зміні вкладок
+            $('.nav-link').click(function () {
+                var href = $(this).attr('href');
+                if(href === '#activity') {
+                    Url.updateSearchParam("tab", '1');
                 }
-            })
+                if(href === '#timeline') {
+                    Url.updateSearchParam("tab", '2');
+                }
+                if(href === '#settings') {
+                    Url.updateSearchParam("tab", '3');
+                }
+                //
+                // if($(this).attr("href") == '#activity'){
+                //         Url.updateSearchParam("tab", '1')
+                //         $('#certificate').removeAttr('disabled');
+                //         $('#certificate_tax').removeAttr('disabled')
+                //     }else{
+                //         $('#certificate').attr('disabled', 'disabled');
+                //         $('#certificate_tax').attr('disabled', 'disabled');
+                //     }
+                 })
+
+            // ---- платник ПДВ -----------
+            // $('#is_pdv').click(function () {
+            //     if($(this).is(":checked")){
+            //         $('#certificate').removeAttr('disabled');
+            //         $('#certificate_tax').removeAttr('disabled')
+            //     }else{
+            //         $('#certificate').attr('disabled', 'disabled');
+            //         $('#certificate_tax').attr('disabled', 'disabled');
+            //     }
+            // })
 
             // ----- меню активне -------
             // $('.nav-link').click(function () {

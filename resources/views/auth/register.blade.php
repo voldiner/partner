@@ -82,14 +82,14 @@
                     <!-- /.col -->
                 </div>
                 @error('terms')
-                <div class="alert alert-danger">
+                <div class="alert alert-danger mt-2">
                     Необхідно встановити відмітку про згоду
                 </div>
                 @enderror
             </form>
 
             <p class="mt-3">
-                <a href="login.html" class="text-center">Я вже зареєстрований</a>
+                <a href="{{ route('login') }}" class="text-center">Я вже зареєстрований</a>
             </p>
 
         </div>

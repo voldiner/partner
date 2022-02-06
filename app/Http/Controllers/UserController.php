@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ChangeUserEmailRequest;
+use App\Http\Requests\ChangeUserPasswordRequest;
 use App\Http\Requests\UserEditRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -22,14 +24,18 @@ class UserController extends Controller
     {
 
     }
-    public function edit($id)
+    public function edit(Request $request)
     {
         $user = auth()->user();
         if (!$user){
             return redirect()->route('welcome');
         }
         $user->pdv_checkbox = $user->is_pdv ? 'checked' : '';
-        return view('profile', compact('user'));
+        $tab = $request->get('tab')?? '1';
+        if (!in_array($tab, ['1','2','3'])){
+            $tab = '1';
+        }
+        return view('profile', compact('user', 'tab'));
     }
 
     public function update(UserEditRequest $request)
@@ -37,6 +43,31 @@ class UserController extends Controller
         dd($request->all());
     }
 
+    public function changeEmail(ChangeUserEmailRequest $request)
+    {
+        $user = auth()->user();
+        $user->email = $request->email;
+        $user->email_verified_at = null;
+        $result = $user->save();
+        if ($result){
+            Log::channel('edit_users')->debug("Change email {$user->name} to {$user->mail}");
+            return redirect()->route('logout');
+        }
+        return redirect()->back()->with(['error' => 'Помилка зміни email']);
+    }
+
+    public function changePassword(ChangeUserPasswordRequest $request)
+    {
+        //dd($request->all());
+        $user = auth()->user();
+        $user->password = bcrypt($request->new_password);
+        $result = $user->save();
+        if ($result){
+            Log::channel('edit_users')->debug("Change password {$user->name}");
+            return redirect()->route('logout');
+        }
+        return redirect()->back()->with(['error' => 'Помилка зміни пароля']);
+    }
 
     public function createUsers()
     {

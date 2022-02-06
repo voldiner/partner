@@ -1,29 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>AdminLTE 3 | Log in</title>
-    <!-- Tell the browser to be responsive to screen width -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('layouts.layout')
+@section('title', 'Підтвердження email')
+@section('body_classes','hold-transition login-page')
+@section('content')
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="../plugins/fontawesome-free/css/all.min.css">
-    <!-- Ionicons -->
-    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <!-- icheck bootstrap -->
-    <link rel="stylesheet" href="../plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-    <!-- Theme style -->
-    <link rel="stylesheet" href="../dist/css/adminlte.min.css">
-    <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-</head>
-<body class="hold-transition login-page">
-@if (session('status'))
-    <div class="alert alert-info">
-        {{ session('status') }}
-    </div>
-@endif
 @if ($errors->any())
     <div class="alert alert-info">
         <ul>
@@ -35,44 +14,54 @@
 @endif
 @if (session('status') == 'verification-link-sent')
     <div class="alert alert-info">
-        Вам отправлена новая ссылка для подтверждения адреса электронной почты!
+        <p> Вам відправлене посилання для підтвердження адреси електронної пошти!</p>
+        <p><b>{{ auth()->user()->email }}</b></p>
     </div>
 @endif
-<div class="login-box">
-    <div class="login-logo">
-        <a href="../../index2.html"><b>Admin</b>LTE</a>
-    </div>
-    <!-- /.login-logo -->
-    <div class="card">
-        <div class="card-body login-card-body">
-            <p class="login-box-msg">
-                Увага! Для продовження роботи необхідно підтвердити Ваш Email . Перейдіть по
-                посиланню, яке знаходиться в листі направленому на Вашу пошту.
-            </p>
 
-            <form action="{{ route('verification.send') }}" method="post">
-                @csrf
+<div class="row justify-content-center">
+    <div class="col-sm-8">
 
-                <div class="row">
-                    <!-- /.col -->
-                    <div class="col">
-                        <button type="submit" class="btn btn-primary btn-block">Відіслати</button>
-                    </div>
-                    <!-- /.col -->
+        <div class="login-box" style="width: 100%;">
+            <div class="login-logo">
+                <a href="{{ route('welcome') }}"><b>{{ env('APP_NAME') }}</b></a>
+            </div>
+            <!-- /.login-logo -->
+            <div class="card">
+                <div class="card-body login-card-body">
+                    <p class="login-box-msg">
+                        Увага! Для продовження роботи необхідно підтвердити Ваш Email <b>{{ auth()->user()->email }}</b>. Перейдіть по
+                        посиланню, яке знаходиться в листі направленому на Вашу пошту.
+                    </p>
+
+                    <form action="{{ route('logout') }}" method="post" style="display: inline;">
+                        @csrf
+                        Якщо лист не знайшовся, то спробуйте пошукати в папці 'Спам' Вашого поштового клієнту, або послати
+                        його повторно з цієї сторінки. Якщо Ваш Email введений помилково, його можна виправити
+                        через повторну реєстрацію. Для цього натисніть
+                        <button type="submit" class="btn btn-link" style="padding: 0px 0px 5px 0px">Вихід</button>
+                    </form>
+                    <form action="{{ route('verification.send') }}" method="post">
+                        @csrf
+
+                        <div class="row justify-content-center">
+                            <!-- /.col -->
+                            <div class="col-sm-4">
+                                <button type="submit" class="btn btn-primary btn-block">Відіслати</button>
+                            </div>
+                            <!-- /.col -->
+                        </div>
+                    </form>
                 </div>
-            </form>
+                <!-- /.login-card-body -->
+            </div>
         </div>
-        <!-- /.login-card-body -->
+        <!-- /.login-box -->
+
+
+
     </div>
 </div>
-<!-- /.login-box -->
 
-<!-- jQuery -->
-<script src="../plugins/jquery/jquery.min.js"></script>
-<!-- Bootstrap 4 -->
-<script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<!-- AdminLTE App -->
-<script src="../dist/js/adminlte.min.js"></script>
 
-</body>
-</html>
+@endsection

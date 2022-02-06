@@ -17,7 +17,7 @@ trait PasswordValidationRules
                 'string',
                 new Password,
                 'confirmed',
-               'regex:((?=.*d)(?=.*[a-z])(?=.*[A-Z]).{8,20})'
+               'regex:((?=.*d)(?=.*[a-z])(?=.*[A-Z])(?=.*[1-9]).{8,20})'
         ];
     }
 }

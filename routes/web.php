@@ -17,11 +17,19 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-Route::get('home', [\App\Http\Controllers\IndexController::class, 'index'])
-    ->middleware('auth:web')
-    ->name('home');
 
+Route::middleware(['auth:web', 'verifiedEmail'])->group(function (){
+
+    Route::get('home', [\App\Http\Controllers\IndexController::class, 'index'])->name('home');
+    Route::get('users/edit', [\App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
+    Route::patch('users/edit', [\App\Http\Controllers\UserController::class, 'update'])->name('users.update');
+    Route::post('users/changeEmail', [\App\Http\Controllers\UserController::class, 'changeEmail'])->name('changeEmail');
+    Route::post('users/changePassword', [\App\Http\Controllers\UserController::class, 'changePassword'])->name('changePassword');
+
+});
+
+
+
+// ---- create users from download file
 Route::get('/users/create', [\App\Http\Controllers\UserController::class, 'createUsers']);
-// todo тільки зареєстрований користувач з таким id middleware створити
-Route::get('users/{id}/edit', [\App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
-Route::patch('users/{id}', [\App\Http\Controllers\UserController::class, 'update'])->name('users.update');
+

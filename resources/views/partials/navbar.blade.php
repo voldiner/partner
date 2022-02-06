@@ -25,10 +25,6 @@
             <form action="{{ route('logout') }}" method="post">
                 @csrf
                 <button type="submit" class="btn btn-default btn-flat">Вихід</button>
-                {{--<button type="submit" class="btn"><i class="fas fa-sign-in-alt" style="font-size: 28px;"></i></button>--}}
-                {{--<a class="btn btn-app">--}}
-                    {{--<i class="fas fa-edit"></i> Logout--}}
-                {{--</a>--}}
             </form>
             {{--<a href="../../index3.html" class="nav-link">Logout</a>--}}
         </li>
