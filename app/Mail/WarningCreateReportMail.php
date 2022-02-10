@@ -33,7 +33,7 @@ class WarningCreateReportMail extends Mailable
     {
         return $this->from(env('MAIL_FROM_ADDRESS'))
             ->subject("Помилки завантаження відомостей по {$this->ac}")
-            ->to(config('partner.warning_create_report_email'))
+            ->to(config('partner.email.warning_create_report_email'))
             ->view('mail.WarningCreateReports', [
                 'warnings' => $this->warnings,
                 'ac' => $this->ac,
