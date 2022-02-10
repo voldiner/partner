@@ -32,4 +32,5 @@ Route::middleware(['auth:web', 'verifiedEmail'])->group(function (){
 
 // ---- create users from download file
 Route::get('/users/create', [\App\Http\Controllers\UserController::class, 'createUsers']);
-
+// ---- create reports from download file
+Route::get('/reports/create', [\App\Http\Controllers\ReportController::class, 'createReports']);

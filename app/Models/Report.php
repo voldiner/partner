@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $day розрахунковий рік
  * @property int $user_id
  * @property int $station_id
+ * @property int $kod_flight
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -34,7 +35,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Report extends Model
 {
     use HasFactory;
-    use SoftDeletes;
+
 
     protected $fillable = [
         'kod_atp',

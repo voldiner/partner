@@ -28,7 +28,7 @@ class CreatePlacesTable extends Migration
 
 
             $table->foreignId('report_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->softDeletes();
+            //$table->softDeletes();
             $table->timestamps();
         });
     }

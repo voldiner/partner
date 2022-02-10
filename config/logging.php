@@ -73,8 +73,13 @@ return [
             'level' => 'debug',
         ],
         'download_users' => [
-            'driver' => 'daily',
+            'driver' => 'single',
             'path' => storage_path('logs/download_users.log'),
+            'level' => 'debug',
+        ],
+        'download_reports' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/download_reports.log'),
             'level' => 'debug',
         ],
         'edit_users' => [

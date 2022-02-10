@@ -30,7 +30,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Place extends Model
 {
     use HasFactory;
-    use SoftDeletes;
 
     protected $fillable = [
         'ticket_id',

@@ -18,6 +18,7 @@ class CreateReportsTable extends Migration
 
             $table->integer('kod_atp')->comment('код перевізника');
             $table->string('num_report')->comment('номер відомості');
+            $table->integer('kod_flight')->comment('код рейсу');
             $table->string('name_flight')->comment('назва рейсу');
             $table->decimal('time_flight',4,2)->comment('час відправки рейсу');
             $table->date('date_flight',4,2)->comment('дата рейсу');
@@ -32,7 +33,7 @@ class CreateReportsTable extends Migration
 
             $table->foreignId('user_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('station_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->softDeletes();
+           // $table->softDeletes();
             $table->timestamps();
         });
     }
