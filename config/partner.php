@@ -18,6 +18,5 @@
    |--------------------------------------------------------------------------
     */
      'download_users_file' => 'downloads/users.dbf',
-     'download_reports_file' => 'downloads/reports.dbf',
-     'download_places_file' => 'downloads/places.dbf',
+
  ];

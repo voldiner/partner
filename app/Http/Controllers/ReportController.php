@@ -8,135 +8,153 @@ use App\Models\Report;
 use App\Models\Station;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use XBase\TableReader;
 
 class ReportController extends Controller
 {
     private $warnings = [];
-    public function createReports()
-    {
-        //todo добавити транзакцію
-        $nameReportfile = base_path(config('partner.download_reports_file'));
-        $namePlacesfile = base_path(config('partner.download_places_file'));
 
-        if (!file_exists($nameReportfile)) {
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * http://partner:81/reports/create?fileReports=reports1.dbf&filePlaces=places1.dbf
+     */
+    public function createReports(Request $request)
+    {
+        if (!$request->has('fileReports')) {
+            Log::channel('download_reports')->debug('get parameter fileReports  not exist');
+            return response()->json(['error' => 'get parameter fileReports  not exist'], 404);
+        }
+        if (!$request->has('filePlaces')) {
+            Log::channel('download_reports')->debug('get parameter filePlaces  not exist');
+            return response()->json(['error' => 'get parameter filePlaces  not exist'], 404);
+        }
+        //todo добавити транзакцію
+        $nameReportfile = 'downloads/' . $request->get('fileReports');
+        $namePlacesfile = 'downloads/' . $request->get('filePlaces');
+
+        if (Storage::missing($nameReportfile)) {
             Log::channel('download_reports')->debug($nameReportfile . ' not exist');
             return response()->json(['error' => $nameReportfile . ' not exist'], 404);
         }
-        if (!file_exists($namePlacesfile)) {
+        if (Storage::missing($namePlacesfile)) {
             Log::channel('download_reports')->debug($namePlacesfile . ' not exist');
             return response()->json(['error' => $namePlacesfile . ' not exist'], 404);
         }
 
-        //try {
-        $table = new TableReader(
-            $nameReportfile,
-            [
-                'encoding' => 'cp866'
-            ]
-        );
-        $tablePlaces = new TableReader(
-            $namePlacesfile,
-            [
-                'encoding' => 'cp866'
-            ]
-        );
+        try {
+            $table = new TableReader(
+                storage_path('app/' . $nameReportfile),
+                [
+                    'encoding' => 'cp866'
+                ]
+            );
+            $tablePlaces = new TableReader(
+                storage_path('app/' . $namePlacesfile),
+                [
+                    'encoding' => 'cp866'
+                ]
+            );
 
-        //throw new \Exception('Testing exception!!!');
-        $countReportsAdd = 0;
-        $countReportsUpdate = 0;
-        $countReportsAll = 0;
-        $startTime = time();
-        // ----- підготовка списку ас ------ //
-        $stations = Station::all();
-        // ----- підготовка списку перевізників ----- //
-        $users = User::where('user_type', 1)
-            ->select(['id', 'name', 'kod_fxp'])
-            ->get()
-            ->toBase();
+            //throw new \Exception('Testing exception!!!');
+            $countReportsAdd = 0;
+            $countReportsUpdate = 0;
+            $countReportsAll = 0;
+            $startTime = time();
+            $station = null;
+            // ----- підготовка списку ас ------ //
+            $stations = Station::all();
+            // ----- підготовка списку перевізників ----- //
+            $users = User::where('user_type', 1)
+                ->select(['id', 'name', 'kod_fxp'])
+                ->get()
+                ->toBase();
 
-        while ($record = $table->nextRecord()) {
-            $countReportsAll++;
-            // ------ валідація -------- //
-            if (!$this->validateRecord($record, $stations, $users)) {
-                continue;
+            while ($record = $table->nextRecord()) {
+                $countReportsAll++;
+                // ------ валідація -------- //
+                if (!$this->validateRecord($record, $stations, $users)) {
+                    continue;
+                }
+                $user_id = $this->getUserId($users, $record);
+                if (!$station) {
+                    $station = $this->getStation($stations, $record);
+                }
+
+                if ($user_id === 0) {
+                    continue;
+                }
+                if (!$station) {
+                    continue;
+                }
+                $places = $this->getPlacesFromDBF($record->get('kr'), $record->get('vr'), $record->get('nved'), $tablePlaces);
+                if (!$places) {
+                    continue;
+                }
+                // ----- визначим додавати нову відомість чи коректувати стару ------- //
+                $report = Report::where([
+                    ['kod_flight', '=', $record->get('kr')],
+                    ['time_flight', '=', $record->get('vr')],
+                    ['day', '=', $record->get('day')],
+                    ['month', '=', $record->get('month')],
+                    ['year', '=', $record->get('year')],
+                ])->first();
+
+                if ($report) {
+                    // видалити  places ,оновити report
+                    $report->places()->delete();
+                    $countReportsUpdate++;
+                } else {
+                    $report = new Report();
+                    $countReportsAdd++;
+                }
+
+                $this->fillReport($report, $record, $station, $user_id);
+
+                $report->save();
+
+                $report->places()->saveMany($places);
             }
-            $user_id = $this->getUserId($users, $record);
-            $station_id = $this->getStationId($stations, $record);
-            if ($user_id === 0) {
-                continue;
+            $timeWork = time() - $startTime;
+            Log::channel('download_reports')->debug("Add {$countReportsAdd} reports. Update {$countReportsUpdate} reports. Time {$timeWork} sec.");
+            $toResponce = ['success' => "Processed {$countReportsAll} record. Add {$countReportsAdd} reports. Update {$countReportsUpdate} reports. Time {$timeWork} sec."];
+            if (count($this->warnings)) {
+                Mail::send(new WarningCreateReportMail($this->warnings, $station->name));
+                foreach ($this->warnings as $warning) {
+                    Log::channel('download_reports')->debug($warning);
+                }
+                $toResponce['warnings'] = $this->warnings;
             }
-            if ($station_id === 0) {
-                continue;
-            }
-            $places = $this->getPlacesFromDBF($record->get('kr'), $record->get('vr'), $record->get('nved'), $tablePlaces);
-            if (!$places) {
-                continue;
-            }
-            // ----- визначим додавати нову відомість чи коректувати стару ------- //
-            $report = Report::where([
-                ['kod_flight', '=', $record->get('kr')],
-                ['time_flight', '=', $record->get('vr')],
-                ['day', '=', $record->get('day')],
-                ['month', '=', $record->get('month')],
-                ['year', '=', $record->get('year')],
-            ])->first();
+            $nameReportArchive = 'reports/' . date("Y_m_d_H_i_s_") . $request->get('fileReports');
+            $namePlacesArchive = 'reports/' . date("Y_m_d_H_i_s_") . $request->get('filePlaces');
+            $this->moveToArchive($nameReportfile, $namePlacesfile, $nameReportArchive, $namePlacesArchive);
+            return response()->json($toResponce, 200);
 
-            if ($report) {
-                // видалити  places ,оновити report
-                $report->places()->delete();
-                $countReportsUpdate++;
-            } else {
-                $report = new Report();
-                $countReportsAdd++;
-            }
-
-            $this->fillReport($report,$record, $station_id, $user_id);
-
-            $report->save();
-
-            $report->places()->saveMany($places);
+        } catch (\Exception $e) {
+            Log::channel('download_reports')->debug($e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        $timeWork = time() - $startTime;
-        Log::channel('download_reports')->debug("Add {$countReportsAdd} reports. Update {$countReportsUpdate} reports. Time {$timeWork} sec.");
-        $toResponce = ['success' => "Processed {$countReportsAll} record. Add {$countReportsAdd} reports. Update {$countReportsUpdate} reports. Time {$timeWork} sec."];
-        if (count($this->warnings)){
-            // todo надіслати по email
-            Mail::send(new WarningCreateReportMail($this->warnings, $station_id));
-            foreach ($this->warnings as $warning){
-                Log::channel('download_reports')->debug($warning);
-            }
-            $toResponce['warnings'] = $this->warnings;
-        }
-        return response()->json($toResponce,200);
-
-        // } catch (\Exception $e) {
-        //     Log::channel('download_reports')->debug($e->getMessage());
-        //     return response()->json(['error' => $e->getMessage()], 500);
-        //  }
 
     }
 
     /**
      * @param string $kod_ac
      * @param Collection $stations
-     * @return int
+     * @return Model | null
      */
-    protected function getStationId(Collection $stations, $record)
+    protected function getStation(Collection $stations, $record)
     {
-        //$kod_ac = (int)$kod_ac;
         $station = $stations->firstWhere('kod', '=', $record->get('kod_ac'));
-        if ($station) {
-            $result = $station->id;
-        } else {
-            $result = 0;
+        if (!$station) {
             $this->warnings[] = "Error not found station_id " . $record->get('kod_ac') . " report #" . $record->get('nved');
             dump("Error not found station_id " . $record->get('kod_ac') . " report #" . $record->get('nved'));
         }
-        return $result;
+        return $station;
     }
 
 
@@ -241,10 +259,10 @@ class ReportController extends Controller
             $this->warnings[] = "Error validate day, month, year  report #" . $record->get('nved');
             dump("Error validate day, month, year  report #" . $record->get('nved'));
         }
-         return $result;
+        return $result;
     }
 
-    protected function fillReport($report, $record, $station_id, $user_id)
+    protected function fillReport($report, $record, $station, $user_id)
     {
         $report->kod_atp = $record->get('katp');
         $report->num_report = $record->get('nved');
@@ -261,9 +279,20 @@ class ReportController extends Controller
         $report->month = $record->get('month');
         $report->day = $record->get('day');
         $report->user_id = $user_id;
-        $report->station_id = $station_id;
+        $report->station_id = $station->id;
     }
 
+    public function moveToArchive($nameReportfile, $namePlacesfile, $nameReportArchive, $namePlacesArchive)
+    {
+        try {
+            throw new \Exception('Testing exception!!!');
+            Storage::move($nameReportfile, $nameReportArchive);
+            Storage::move($namePlacesfile, $namePlacesArchive);
+        } catch (\Exception $e) {
+            Log::channel('download_reports')->debug($e->getMessage());
+        }
+
+    }
 
 
 }
