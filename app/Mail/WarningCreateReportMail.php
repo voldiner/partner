@@ -10,18 +10,18 @@ use Illuminate\Queue\SerializesModels;
 class WarningCreateReportMail extends Mailable
 {
     use Queueable, SerializesModels;
-    private $warnings;
-    private $ac;
+    private $warnings, $ac, $message;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($warnings, $ac)
+    public function __construct($warnings, $ac, $message)
     {
         $this->warnings = $warnings;
         $this->ac = $ac;
+        $this->message = $message;
     }
 
     /**
@@ -37,6 +37,7 @@ class WarningCreateReportMail extends Mailable
             ->view('mail.WarningCreateReports', [
                 'warnings' => $this->warnings,
                 'ac' => $this->ac,
+                'messageToSend' => $this->message,
             ]);
     }
 }
