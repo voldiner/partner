@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
+    public function index()
+    {
+        return view('reports');
+    }
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -58,13 +62,13 @@ class ReportController extends Controller
 
             $notificationRepository->createReportsNotification($reportRepository->warnings, $reportRepository->station, $message);
 
-//            $reportRepository->moveToArchive(
-//                $nameReportfile,
-//                $namePlacesfile,
-//                $request->get('fileReports'),
-//                $request->get('filePlaces'),
-//                $loggingRepository
-//            );
+            $reportRepository->moveToArchive(
+                $nameReportfile,
+                $namePlacesfile,
+                $request->get('fileReports'),
+                $request->get('filePlaces'),
+                $loggingRepository
+            );
             return response()->json($toResponce, 200);
 
         } catch (\Exception $e) {

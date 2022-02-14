@@ -25,7 +25,7 @@ Route::middleware(['auth:web', 'verifiedEmail'])->group(function (){
     Route::patch('users/edit', [\App\Http\Controllers\UserController::class, 'update'])->name('users.update');
     Route::post('users/changeEmail', [\App\Http\Controllers\UserController::class, 'changeEmail'])->name('changeEmail');
     Route::post('users/changePassword', [\App\Http\Controllers\UserController::class, 'changePassword'])->name('changePassword');
-
+    Route::get('reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
 });
 
 
