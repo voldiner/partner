@@ -20,12 +20,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class ReportRepository
 {
-    public $warnings, $station;
+    public $warnings;
 
     public function __construct()
     {
         $this->warnings = [];
-        $this->station = null;
     }
 
     /**
@@ -71,17 +70,17 @@ class ReportRepository
                 continue;
             }
             $user_id = $this->getUserId($users, $record);
-            if (!$this->station) {
-                $this->station = $this->getStation($stations, $record);
-            }
+
+            $station = $this->getStation($stations, $record);
+
 
             if ($user_id === 0) {
                 continue;
             }
-            if (!$this->station) {
+            if (!$station) {
                 continue;
             }
-            $places = $this->getPlacesFromDBF($record->get('kr'), $record->get('vr'), $record->get('nved'), $tablePlaces);
+            $places = $this->getPlacesFromDBF($record->get('kr'), $record->get('vr'), $record->get('nved'), $tablePlaces, $record->get('kod_ac'));
             if (!$places) {
                 continue;
             }
@@ -103,7 +102,7 @@ class ReportRepository
                 $countReportsAdd++;
             }
 
-            $this->fillReport($report, $record, $this->station, $user_id);
+            $this->fillReport($report, $record, $station, $user_id);
 
             $report->save();
 
@@ -143,7 +142,7 @@ class ReportRepository
             $result = $user->id;
         } else {
             $result = 0;
-            $this->warnings[] = " Error not found user_id " . $record->get('katp') . " report #" . $record->get('nved');
+            $this->warnings[] = 'Error not found user_id ' . $record->get('katp') . ' report #' . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
             dump(" Error not found user_id " . $record->get('katp') . " report #" . $record->get('nved'));
         }
         return $result;
@@ -176,7 +175,7 @@ class ReportRepository
         return false;
     }
 
-    protected function getPlacesFromDBF($kod_flight, $time_flight, $nomved, $table)
+    protected function getPlacesFromDBF($kod_flight, $time_flight, $nomved, $table, $kod_ac)
     {
         $result = [];
         $table->moveTo(0);
@@ -190,14 +189,14 @@ class ReportRepository
                     'name_stop' => $record->get('name_stop'),
                     'sum' => $record->get('suma'),
                     'num_certificate' => $record->get('num_psw'),
-                    'name_benefit' => $record->get('name_plg'),
+                    'name_benefit' => empty($record->get('name_plg')) ? null : $record->get('name_plg'),
                     'name_passenger' => $record->get('fml_plg'),
                     'type' => $record->get('internet'),
                 ]);
             }
         }
         if (count($result) === 0) {
-            $this->warnings[] = " Error not found places report #{$nomved}";
+            $this->warnings[] = " Error not found places report #{$nomved} код АС {$kod_ac} код рейсу {$kod_flight} час відправки {$time_flight}";
             dump(" Error not found places report #{$nomved}");
             return false;
         }
@@ -213,28 +212,28 @@ class ReportRepository
     {
         $result = true;
         if (!is_numeric($record->get('katp')) || $record->get('katp') == 0) {
-            $this->warnings[] = " Error validate katp " . $record->get('katp') . " report #" . $record->get('nved');
+            $this->warnings[] = " Error validate katp " . $record->get('katp') . " report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
             $result = false;
-            dump("Error validate katp " . $record->get('katp') . " report #" . $record->get('nved'));
+            dump("Error validate katp " . $record->get('katp') . " report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac'));
         }
         if (!is_numeric($record->get('kod_ac')) || $record->get('kod_ac') == 0) {
             $result = false;
-            $this->warnings[] = " Error validate kod_ac " . $record->get('kod_ac') . " report #" . $record->get('nved');
+            $this->warnings[] = " Error validate kod_ac " . $record->get('kod_ac') . " report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
             dump("Error validate kod_ac " . $record->get('kod_ac') . " report #" . $record->get('nved'));
         }
         if ($record->get('vr') <= 0 || $record->get('vr') > 24.00) {
             $result = false;
-            $this->warnings[] = "Error validate vr " . $record->get('vr') . " report #" . $record->get('nved');
+            $this->warnings[] = "Error validate vr " . $record->get('vr') . " report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
             dump("Error validate vr " . $record->get('vr') . " report #" . $record->get('nved'));
         }
         if (empty($record->get('name_r'))) {
             $result = false;
-            $this->warnings[] = "Error validate name_r report #" . $record->get('nved');
+            $this->warnings[] = "Error validate name_r report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
             dump("Error validate name_r report #" . $record->get('nved'));
         }
         if (!$this->validateDMY($record->get('day'), $record->get('month'), $record->get('year'))) {
             $result = false;
-            $this->warnings[] = "Error validate day, month, year  report #" . $record->get('nved');
+            $this->warnings[] = "Error validate day, month, year  report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
             dump("Error validate day, month, year  report #" . $record->get('nved'));
         }
         return $result;

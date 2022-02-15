@@ -15,10 +15,10 @@ use Illuminate\Support\Facades\Mail;
 
 class NotificationRepository
 {
-    public function createReportsNotification(array $warnings, Station $station, string $message)
+    public function createReportsNotification(array $warnings, string $message)
     {
         if (count($warnings)){
-            Mail::send(new WarningCreateReportMail($warnings, $station->name, $message));
+            Mail::send(new WarningCreateReportMail($warnings, $message));
         }
 
     }

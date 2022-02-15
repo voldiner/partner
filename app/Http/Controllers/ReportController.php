@@ -60,7 +60,7 @@ class ReportController extends Controller
 
             $toResponce = $reportRepository->createDataResponce($message, $reportRepository->warnings);
 
-            $notificationRepository->createReportsNotification($reportRepository->warnings, $reportRepository->station, $message);
+            $notificationRepository->createReportsNotification($reportRepository->warnings, $message);
 
             $reportRepository->moveToArchive(
                 $nameReportfile,
