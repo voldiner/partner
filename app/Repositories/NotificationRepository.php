@@ -10,7 +10,6 @@ namespace App\Repositories;
 
 
 use App\Mail\WarningCreateReportMail;
-use App\Models\Station;
 use Illuminate\Support\Facades\Mail;
 
 class NotificationRepository

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Station;
 use App\Repositories\LoggingRepository;
 use App\Repositories\NotificationRepository;
 use App\Repositories\ReportRepository;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -12,8 +14,20 @@ class ReportController extends Controller
 {
     public function index()
     {
-        return view('reports');
+        $maxDate = Carbon::createFromTimestamp(time())->format('d/m/Y');
+        $startDate = Carbon::createFromTimestamp(time())->subDay(30)->format('d/m/Y');
+        $endDate = Carbon::createFromTimestamp(time())->format('d/m/Y');
+
+        $stations = Station::all()->pluck('name', 'id');
+        return view('reports', compact
+        (
+            'maxDate',
+                'startDate',
+                   'endDate',
+            'stations'
+        ));
     }
+
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse

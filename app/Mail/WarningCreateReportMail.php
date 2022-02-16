@@ -17,7 +17,7 @@ class WarningCreateReportMail extends Mailable
      *
      * @return void
      */
-    public function __construct($warnings, $ac, $message)
+    public function __construct($warnings, $message)
     {
         $this->warnings = $warnings;
         $this->message = $message;
