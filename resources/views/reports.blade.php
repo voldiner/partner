@@ -49,12 +49,18 @@
                                     </div>
                                     <!-- /.card-header -->
                                     <div class="card-body" style="display: block;">
-                                        <form action="#">
+                                        <form action="{{ route('reports.index') }}" method="get">
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <!-- data range -->
                                                     <div class="form-group">
-                                                        <label>Період:</label>
+                                                        <div class="icheck-primary mb-1">
+                                                            <input type="checkbox" id="remember" value="1" name="interval">
+                                                            <label for="remember">
+                                                                Період:
+                                                            </label>
+                                                        </div>
+                                                        {{--<label>Період:</label>--}}
                                                         <div class="input-group">
                                                             <div class="input-group-prepend">
                                                                 <span class="input-group-text">
@@ -62,7 +68,7 @@
                                                                 </span>
                                                             </div>
                                                             <input name="data-range" type="text" class="form-control float-right"
-                                                                   id="reservation">
+                                                                   id="reservation"  style="height: 35px;">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -107,6 +113,30 @@
                                         </form>
 
                                     </div>
+                                    <!-- /.card-body -->
+                                </div>
+
+                            </div>
+                            <div class="col-12">
+                                <div class="card card-gray rounded-pill">
+                                    <div class="card-header rounded-pill">
+                                        <p class="card-title">
+                                            <a class="btn btn-danger btn-sm" href="#">
+                                                <i class="fas fa-trash">
+                                                </i>
+                                                Скасувати
+                                            </a>
+                                            <span class="mr-2 ml-2">Обрано 12 відомостей:</span>
+                                            <span class="badge badge-warning mt-1" style="font-size: 100%;">Період: з 01.01.2022 по 31.01.2022</span>
+                                            <span class="badge badge-warning mt-1" style="font-size: 100%;">АС Ковель</span>
+                                            <span class="badge badge-warning mt-1" style="font-size: 100%;">номер: 123455</span>
+                                            <span class="badge badge-warning mt-1" style="font-size: 100%;">сума: 123,55</span>
+                                        </p>
+
+                                        <!-- /.card-tools -->
+                                    </div>
+                                    <!-- /.card-header -->
+
                                     <!-- /.card-body -->
                                 </div>
 
@@ -306,6 +336,24 @@
     {{--<script src="{{ asset('dist/js/url.min.js') }}"></script>--}}
     <script>
         jQuery(function ($) {
+            if($('#remember').is(":checked")){
+                $('#reservation').removeAttr('disabled');
+                $('#reservation').removeAttr('disabled')
+            }else{
+                $('#reservation').attr('disabled', 'disabled');
+                $('#reservation').attr('disabled', 'disabled');
+            }
+
+            // -- disable or enable date range
+            $('#remember').click(function () {
+                     if($(this).is(":checked")){
+                         $('#reservation').removeAttr('disabled');
+                         $('#reservation').removeAttr('disabled')
+                     }else{
+                         $('#reservation').attr('disabled', 'disabled');
+                         $('#reservation').attr('disabled', 'disabled');
+                     }
+            });
             //Initialize Select2 Elements
             $('.select2').select2();
             //Date range picker

@@ -12,8 +12,9 @@ use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        //dump($request);
         $maxDate = Carbon::createFromTimestamp(time())->format('d/m/Y');
         $startDate = Carbon::createFromTimestamp(time())->subDay(30)->format('d/m/Y');
         $endDate = Carbon::createFromTimestamp(time())->format('d/m/Y');
