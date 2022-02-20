@@ -35,6 +35,7 @@
                 <section class="content">
                     <div class="container-fluid">
                         @include('partials.status_message')
+                        @include('partials.validation_messages')
                         <div class="row">
                             <div class="col-12">
                                 <div class="card card-gray">
@@ -76,11 +77,11 @@
                                                     <!-- multiple -->
                                                     <div class="form-group">
                                                         <label>Автостанції</label>
-                                                        <select id="category" name="category" class="select2" multiple="multiple"
+                                                        <select id="category" name="stations[]" class="select2" multiple="multiple"
                                                                 data-placeholder="Виберіть автостанцію"
                                                                 style="width: 100%;">
-                                                            @if($stations->count())
-                                                                @foreach($stations as $key => $station)
+                                                            @if($stationsFromSelect->count())
+                                                                @foreach($stationsFromSelect as $key => $station)
                                                                     <option value="{{ $key }}">{{ $station }}</option>
                                                                 @endforeach
                                                             @else
@@ -118,19 +119,30 @@
 
                             </div>
                             <div class="col-12">
+                                @if($stationsSelected || $numberReport || $sum_report || $dateS || $stationsSelected)
                                 <div class="card card-gray rounded-pill">
                                     <div class="card-header rounded-pill">
                                         <p class="card-title">
-                                            <a class="btn btn-danger btn-sm" href="#">
+                                            <a class="btn btn-danger btn-sm" href="{{ route('reports.index') }}">
                                                 <i class="fas fa-trash">
                                                 </i>
                                                 Скасувати
                                             </a>
-                                            <span class="mr-2 ml-2">Обрано 12 відомостей:</span>
-                                            <span class="badge badge-warning mt-1" style="font-size: 100%;">Період: з 01.01.2022 по 31.01.2022</span>
-                                            <span class="badge badge-warning mt-1" style="font-size: 100%;">АС Ковель</span>
-                                            <span class="badge badge-warning mt-1" style="font-size: 100%;">номер: 123455</span>
-                                            <span class="badge badge-warning mt-1" style="font-size: 100%;">сума: 123,55</span>
+                                            <span class="mr-2 ml-2">Обрано {{ $countReports }} відомостей:</span>
+                                            @if($dateS)
+                                                <span class="badge badge-warning mt-1" style="font-size: 100%;">Період: {{ $dateS }} по {{ $dateF }}</span>
+                                            @endif
+                                            @if($stationsSelected)
+                                                @foreach($stationsSelected as $stationSelected)
+                                                    <span class="badge badge-warning mt-1" style="font-size: 100%;">{{ $stationSelected->name }}</span>
+                                                @endforeach
+                                            @endif
+                                            @if($numberReport)
+                                                <span class="badge badge-warning mt-1" style="font-size: 100%;">номер: {{ $numberReport }}</span>
+                                            @endif
+                                            @if($sum_report)
+                                                <span class="badge badge-warning mt-1" style="font-size: 100%;">сума: {{ $sum_report }}</span>
+                                            @endif
                                         </p>
 
                                         <!-- /.card-tools -->
@@ -139,30 +151,31 @@
 
                                     <!-- /.card-body -->
                                 </div>
-
+                                @endif
                             </div>
                             <!-- /.col -->
                             <div class="col-12">
-                                <div class="card card-info collapsed-card mb-1">
-                                    <div class="card-header">
+                                @forelse ($reports as $report)
+                                    <div class="card card-info collapsed-card mb-1">
+                                        <div class="card-header">
                                             <div class="row justify-content-between">
                                                 <div class="col-xl-2 border-right text-center">
-                                                    12.01.2022
+                                                    {{ $report->date_flight->format('d-m-Y') }}
                                                 </div>
                                                 <div class="col-xl-2 border-right text-center">
-                                                        АС Луцьк
+                                                    {{ $report->station->name }}
                                                 </div>
                                                 <div class="col-xl-3 col-sm-5 border-right text-center">
-                                                    Луцьк - Володимир-Волинський ч/з Гать
+                                                    {{ $report->name_flight }}
                                                 </div>
                                                 <div class="col-xl-1 col-sm-2 border-right text-center">
-                                                    15-00
+                                                    {{ $report->time_flight }}
                                                 </div>
                                                 <div class="col-xl-1 col-sm-2 border-right text-center">
-                                                    #123456
+                                                    {{ $report->num_report }}
                                                 </div>
                                                 <div class="col-sm-2 text-center">
-                                                    99125,35
+                                                    {{ $report->sum_tariff }}
                                                 </div>
                                                 <div class="card-tools col-md-1 text-right">
                                                     <span class="badge badge-warning" style="font-size: 100%;">8</span>
@@ -170,139 +183,107 @@
                                                     </button>
                                                 </div>
                                             </div>
-                                    </div>
-                                    <!-- /.card-header -->
-                                    <div class="card-body" style="display: none;">
-                                        <div class="row">
-                                            <div class="col-lg-6">
-                                                <table class="table table-sm">
-                                                    <thead>
-                                                    <tr>
-                                                        <th style="width: 40px">#</th>
-                                                        <th>Зупинка</th>
-                                                        <th style="width: 80px">Місце</th>
-                                                        <th style="width: 100px">Номер квитка</th>
-                                                        <th style="width: 80px">Сума</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <tr>
-                                                        <td>1.</td>
-                                                        <td>Lorem ipsum dolor sit amet, consectetur adipisicing?</td>
-                                                        <td>1</td>
-                                                        <td>93/65879</td>
-                                                        <td>99125,32</td>
-                                                    </tr>
-                                                    <tr style="background-color: rgba(0,0,0,.05);">
-                                                        <td>2.</td>
-                                                        <td>Рівне</td>
-                                                        <td>1</td>
-                                                        <td>93/65879</td>
-                                                        <td>0</td>
-                                                    </tr>
-                                                    <tr style="background-color: rgba(0,0,0,.05);">
-                                                        <td colspan="5" style="border-top: none;"> <span class="ml-md-5">1132492 учасник бойових дій ШАФРАН</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>3.</td>
-                                                        <td>Житомир</td>
-                                                        <td>1</td>
-                                                        <td>9/679</td>
-                                                        <td>125,32</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>4.</td>
-                                                        <td>Рівне</td>
-                                                        <td>1</td>
-                                                        <td>93/65879</td>
-                                                        <td>125,32</td>
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                            <div class="col-lg-6">
-                                                <table class="table table-sm">
-                                                    {{--<thead>--}}
-                                                    {{--<tr>--}}
+                                        </div>
+                                        <!-- /.card-header -->
+                                        <div class="card-body" style="display: none;">
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                        <tr>
+                                                            <th style="width: 40px">#</th>
+                                                            <th>Зупинка</th>
+                                                            <th style="width: 80px">Місце</th>
+                                                            <th style="width: 100px">Номер квитка</th>
+                                                            <th style="width: 80px">Сума</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr>
+                                                            <td>1.</td>
+                                                            <td>Lorem ipsum dolor sit amet, consectetur adipisicing?</td>
+                                                            <td>1</td>
+                                                            <td>93/65879</td>
+                                                            <td>99125,32</td>
+                                                        </tr>
+                                                        <tr style="background-color: rgba(0,0,0,.05);">
+                                                            <td>2.</td>
+                                                            <td>Рівне</td>
+                                                            <td>1</td>
+                                                            <td>93/65879</td>
+                                                            <td>0</td>
+                                                        </tr>
+                                                        <tr style="background-color: rgba(0,0,0,.05);">
+                                                            <td colspan="5" style="border-top: none;"> <span class="ml-md-5">1132492 учасник бойових дій ШАФРАН</span></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>3.</td>
+                                                            <td>Житомир</td>
+                                                            <td>1</td>
+                                                            <td>9/679</td>
+                                                            <td>125,32</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>4.</td>
+                                                            <td>Рівне</td>
+                                                            <td>1</td>
+                                                            <td>93/65879</td>
+                                                            <td>125,32</td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <table class="table table-sm">
+                                                        {{--<thead>--}}
+                                                        {{--<tr>--}}
                                                         {{--<th style="width: 40px">#</th>--}}
                                                         {{--<th>Зупинка</th>--}}
                                                         {{--<th style="width: 80px">Місце</th>--}}
                                                         {{--<th style="width: 100px">Номер квитка</th>--}}
                                                         {{--<th style="width: 80px">Сума</th>--}}
-                                                    {{--</tr>--}}
-                                                    {{--</thead>--}}
-                                                    <tbody>
-                                                    <tr>
-                                                        <td style="width: 40px">5.</td>
-                                                        <td>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Error, maiores?</td>
-                                                        <td style="width: 80px">1</td>
-                                                        <td style="width: 100px">93/65879</td>
-                                                        <td style="width: 80px">99125,32</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>6.</td>
-                                                        <td>Рівне</td>
-                                                        <td>1</td>
-                                                        <td>93/65879</td>
-                                                        <td>125,32</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>7.</td>
-                                                        <td>Житомир</td>
-                                                        <td>1</td>
-                                                        <td>9/679</td>
-                                                        <td>125,32</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>8.</td>
-                                                        <td>Рівне</td>
-                                                        <td>1</td>
-                                                        <td>93/65879</td>
-                                                        <td>125,32</td>
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
+                                                        {{--</tr>--}}
+                                                        {{--</thead>--}}
+                                                        <tbody>
+                                                        <tr>
+                                                            <td style="width: 40px">5.</td>
+                                                            <td>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Error, maiores?</td>
+                                                            <td style="width: 80px">1</td>
+                                                            <td style="width: 100px">93/65879</td>
+                                                            <td style="width: 80px">99125,32</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>6.</td>
+                                                            <td>Рівне</td>
+                                                            <td>1</td>
+                                                            <td>93/65879</td>
+                                                            <td>125,32</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>7.</td>
+                                                            <td>Житомир</td>
+                                                            <td>1</td>
+                                                            <td>9/679</td>
+                                                            <td>125,32</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>8.</td>
+                                                            <td>Рівне</td>
+                                                            <td>1</td>
+                                                            <td>93/65879</td>
+                                                            <td>125,32</td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
+                                        <!-- /.card-body -->
                                     </div>
-                                    <!-- /.card-body -->
-                                </div>
-                                <div class="card card-info collapsed-card mb-1">
-                                    <div class="card-header">
-                                        <div class="row justify-content-between">
-                                            <div class="col-xl-2 border-right text-center">
-                                                12.01.2022
-                                            </div>
-                                            <div class="col-xl-2 border-right text-center">
-                                                АС Луцьк
-                                            </div>
-                                            <div class="col-xl-3 col-sm-5 border-right text-center">
-                                                Луцьк - Володимир-Волинський ч/з Гать
-                                            </div>
-                                            <div class="col-xl-1 col-sm-2 border-right text-center">
-                                                15-00
-                                            </div>
-                                            <div class="col-xl-1 col-sm-2 border-right text-center">
-                                                #123456
-                                            </div>
-                                            <div class="col-sm-2 text-center">
-                                                99125,35
-                                            </div>
-                                            <div class="card-tools col-md-1 text-right">
-                                                <span class="badge badge-warning" style="font-size: 100%;">4</span>
-                                                <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <!-- /.card-tools -->
-                                    </div>
-                                    <!-- /.card-header -->
-                                    <div class="card-body" style="display: none;">
-                                        The body of the card
-                                    </div>
-                                    <!-- /.card-body -->
-                                </div>
-
+                                @empty
+                                    <p>Відомостей не знайдено...</p>
+                                @endforelse
+                                    {{ $reports->links() }}
                             </div>
                             <!-- /.col -->
                         </div>

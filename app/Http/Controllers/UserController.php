@@ -71,7 +71,7 @@ class UserController extends Controller
 
     public function createUsers()
     {
-        $namefile = base_path(config('partner.download_users_file'));
+        $namefile = config('partner.download_users_file');
 
         if (!file_exists($namefile)) {
             Log::channel('download_users')->debug($namefile . ' not exist');

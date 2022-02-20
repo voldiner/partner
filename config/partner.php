@@ -17,6 +17,6 @@
    | директорія, куди завантажуються по FTP файли від корня проекту
    |--------------------------------------------------------------------------
     */
-     'download_users_file' => 'downloads/users.dbf',
+     'download_users_file' => storage_path('app/downloads/users.dbf'),
 
  ];

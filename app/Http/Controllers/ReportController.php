@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ReportsSearchRequest;
+use App\Models\Report;
 use App\Models\Station;
 use App\Repositories\LoggingRepository;
 use App\Repositories\NotificationRepository;
@@ -12,20 +14,71 @@ use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
-    public function index(Request $request)
+    public function index(ReportsSearchRequest $request)
     {
-        //dump($request);
+        //dump($request->all());
+        $stationsFromSelect = Station::all()->pluck('name', 'id');
+        $numberReport = null;
+        $sum_report = null;
+        $stationsSelected = null;
+        $dateS = null;
+        $dateF = null;
+        if ($request->hasAny(['sum_report','number_report','stations','data-range'])){
+            $query = Report::query();
+            // ---- підготовка масиву умов відбору and --------
+            $conditionsAnd = [];
+            if ($request->has('interval')) {
+                $dateStart = Carbon::createFromFormat('d/m/Y', $request->get('dateStart'));
+                $dateFinish = Carbon::createFromFormat('d/m/Y', $request->get('dateFinish'));
+                $conditionsAnd[] = ['date_flight', '>=', $dateStart];
+                $conditionsAnd[] = ['date_flight', '<=', $dateFinish];
+                $dateS = $dateStart->format('d.m.Y');
+                $dateF = $dateFinish->format('d.m.Y');
+            }
+            if ($request->number_report) {
+                $conditionsAnd[] = ['num_report', '=', $request->number_report];
+                $numberReport = $request->number_report;
+            }
+            if ($request->sum_report) {
+                $conditionsAnd[] = ['sum_tariff', '=', $request->sum_report];
+                $sum_report = $request->sum_report;
+            }
+            $query->where($conditionsAnd);
+            // ----------- OR statement ------------------------- //
+            if ($request->has('stations')) {
+                $query->whereIn('station_id',$request->get('stations'));
+                $stationsSelected = Station::whereIn('id',$request->get('stations'))->get();
+            }
+            $query->orderBy('date_flight')
+                  ->with('station');
+
+            //dd($reports);
+
+
+        }else{
+            $query = Report::query();
+        }
+        $countReports = $query->count();
+        $reports = $query->paginate(5)->withQueryString();
+
         $maxDate = Carbon::createFromTimestamp(time())->format('d/m/Y');
         $startDate = Carbon::createFromTimestamp(time())->subDay(30)->format('d/m/Y');
         $endDate = Carbon::createFromTimestamp(time())->format('d/m/Y');
 
-        $stations = Station::all()->pluck('name', 'id');
+
         return view('reports', compact
         (
             'maxDate',
-                'startDate',
-                   'endDate',
-            'stations'
+            'startDate',
+            'endDate',
+            'stationsFromSelect',
+            'reports',
+            'countReports',
+            'numberReport',
+            'sum_report',
+            'stationsSelected',
+            'dateS',
+            'dateF'
         ));
     }
 
