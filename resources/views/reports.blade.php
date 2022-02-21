@@ -56,7 +56,7 @@
                                                     <!-- data range -->
                                                     <div class="form-group">
                                                         <div class="icheck-primary mb-1">
-                                                            <input type="checkbox" id="remember" value="1" name="interval">
+                                                            <input type="checkbox" id="remember" value="1" name="interval" @if($dateStart && $dateFinish) checked="" @endif>
                                                             <label for="remember">
                                                                 Період:
                                                             </label>
@@ -82,7 +82,11 @@
                                                                 style="width: 100%;">
                                                             @if($stationsFromSelect->count())
                                                                 @foreach($stationsFromSelect as $key => $station)
-                                                                    <option value="{{ $key }}">{{ $station }}</option>
+                                                                    @if($stationsSelected && $stationsSelected->contains($key))
+                                                                        <option value="{{ $key }}" selected>{{ $station }}</option>
+                                                                    @else
+                                                                        <option value="{{ $key }}">{{ $station }}</option>
+                                                                    @endif
                                                                 @endforeach
                                                             @else
                                                                 <option disabled>Відсутній список АС</option>
@@ -93,13 +97,23 @@
                                                 <div class="col-xl-2 col-sm-3">
                                                     <div class="form-group">
                                                         <label>Номер відомості</label>
-                                                        <input type="text" class="form-control" id="number_report" name="number_report" placeholder="Номер відомості">
+                                                        <input type="text" class="form-control @error('number_report') is-invalid @enderror" value="{{ old('number_report',$numberReport) }}"id="number_report" name="number_report" placeholder="Номер відомості">
+                                                        @error('number_report')
+                                                        <div class="invalid-feedback" style="display: block;">
+                                                            {{ $message }}
+                                                        </div>
+                                                        @enderror
                                                     </div>
                                                 </div>
                                                 <div class="col-xl-2 col-sm-3">
                                                     <div class="form-group">
                                                         <label>Сума відомості</label>
-                                                        <input type="text" class="form-control" id="sum_report" name="sum_report" placeholder="сума відомості">
+                                                        <input type="text" class="form-control @error('sum_report') is-invalid @enderror" value="{{ old('sum_report',$sum_report) }}" id="sum_report" name="sum_report" placeholder="сума відомості">
+                                                        @error('sum_report')
+                                                        <div class="invalid-feedback" style="display: block;">
+                                                            {{ $message }}
+                                                        </div>
+                                                        @enderror
                                                     </div>
                                                 </div>
                                             </div>
@@ -119,7 +133,7 @@
 
                             </div>
                             <div class="col-12">
-                                @if($stationsSelected || $numberReport || $sum_report || $dateS || $stationsSelected)
+                                @if($stationsSelected || $numberReport || $sum_report || $dateStart || $dateFinish|| $stationsSelected)
                                 <div class="card card-gray rounded-pill">
                                     <div class="card-header rounded-pill">
                                         <p class="card-title">
@@ -129,8 +143,8 @@
                                                 Скасувати
                                             </a>
                                             <span class="mr-2 ml-2">Обрано {{ $countReports }} відомостей:</span>
-                                            @if($dateS)
-                                                <span class="badge badge-warning mt-1" style="font-size: 100%;">Період: {{ $dateS }} по {{ $dateF }}</span>
+                                            @if($dateStart && $dateFinish)
+                                                <span class="badge badge-warning mt-1" style="font-size: 100%;">Період: {{ $dateStart->format('d.m.Y') }} по {{ $dateFinish->format('d.m.Y') }}</span>
                                             @endif
                                             @if($stationsSelected)
                                                 @foreach($stationsSelected as $stationSelected)
@@ -159,7 +173,8 @@
                                     <div class="card card-info collapsed-card mb-1">
                                         <div class="card-header">
                                             <div class="row justify-content-between">
-                                                <div class="col-xl-2 border-right text-center">
+                                                <div class="col-xl-2 border-right text-xl-left text-center ">
+                                                    <span style="margin-right: 15px;">{{ ($reports->currentPage() - 1) * $reports->perPage() + $loop->iteration }}.</span>
                                                     {{ $report->date_flight->format('d-m-Y') }}
                                                 </div>
                                                 <div class="col-xl-2 border-right text-center">
@@ -178,7 +193,7 @@
                                                     {{ $report->sum_tariff }}
                                                 </div>
                                                 <div class="card-tools col-md-1 text-right">
-                                                    <span class="badge badge-warning" style="font-size: 100%;">8</span>
+                                                    <span class="badge badge-warning" style="font-size: 100%;">{{ $report->places_count }}</span>
                                                     <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i>
                                                     </button>
                                                 </div>
@@ -187,95 +202,67 @@
                                         <!-- /.card-header -->
                                         <div class="card-body" style="display: none;">
                                             <div class="row">
-                                                <div class="col-lg-6">
-                                                    <table class="table table-sm">
-                                                        <thead>
-                                                        <tr>
-                                                            <th style="width: 40px">#</th>
-                                                            <th>Зупинка</th>
-                                                            <th style="width: 80px">Місце</th>
-                                                            <th style="width: 100px">Номер квитка</th>
-                                                            <th style="width: 80px">Сума</th>
-                                                        </tr>
-                                                        </thead>
+                                                @if($report->places_count > 0)
+                                                    @php
+                                                        $countCol1 = $report->places_count < 5 ? $report->places_count : (int) ($report->places_count / 2);
+                                                        $countCol2 = $report->places_count < 5 ? 0 :$report->places_count - $countCol1;
+                                                    @endphp
+                                                    <div class="col-lg-6">
+                                                        <table class="table table-sm">
+                                                            <thead>
+                                                            <tr>
+                                                                <th style="width: 40px">#</th>
+                                                                <th>Зупинка</th>
+                                                                <th style="width: 80px">Місце</th>
+                                                                <th style="width: 100px">Номер квитка</th>
+                                                                <th style="width: 80px">Сума</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            @for($i = 0; $i < $countCol1; $i++)
+                                                                    <tr style="background-color: rgba(0,0,0,.05);">
+                                                                        <td>{{ $i+1 }}.</td>
+                                                                        <td>{{ $report->places[$i]->name_stop }}</td>
+                                                                        <td>{{ $report->places[$i]->number_place }}</td>
+                                                                        <td>{{ $report->places[$i]->ticket_id }}</td>
+                                                                        <td>{{ $report->places[$i]->sum }}</td>
+                                                                    </tr>
+                                                                    @if($report->places[$i]->name_benefit)
+                                                                        <tr style="background-color: rgba(0,0,0,.05);">
+                                                                            <td colspan="5" style="border-top: none;"> <span class="ml-md-5">{{ $report->places[$i]->num_certificate}}/{{ $report->places[$i]->name_benefit }}/{{ $report->places[$i]->name_passenger }} </span></td>
+                                                                        </tr>
+                                                                    @endif
+                                                            @endfor
+
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    @if($countCol2 > 0)
+                                                        <div class="col-lg-6">
+                                                        <table class="table table-sm">
                                                         <tbody>
-                                                        <tr>
-                                                            <td>1.</td>
-                                                            <td>Lorem ipsum dolor sit amet, consectetur adipisicing?</td>
-                                                            <td>1</td>
-                                                            <td>93/65879</td>
-                                                            <td>99125,32</td>
-                                                        </tr>
-                                                        <tr style="background-color: rgba(0,0,0,.05);">
-                                                            <td>2.</td>
-                                                            <td>Рівне</td>
-                                                            <td>1</td>
-                                                            <td>93/65879</td>
-                                                            <td>0</td>
-                                                        </tr>
-                                                        <tr style="background-color: rgba(0,0,0,.05);">
-                                                            <td colspan="5" style="border-top: none;"> <span class="ml-md-5">1132492 учасник бойових дій ШАФРАН</span></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>3.</td>
-                                                            <td>Житомир</td>
-                                                            <td>1</td>
-                                                            <td>9/679</td>
-                                                            <td>125,32</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>4.</td>
-                                                            <td>Рівне</td>
-                                                            <td>1</td>
-                                                            <td>93/65879</td>
-                                                            <td>125,32</td>
-                                                        </tr>
+                                                        @for($i = $countCol1; $i < $countCol1 + $countCol2; $i++)
+                                                                <tr style="background-color: rgba(0,0,0,.05);">
+                                                                    <td style="width: 40px">{{ $i }}.</td>
+                                                                    <td>{{ $report->places[$i]->name_stop }}</td>
+                                                                    <td style="width: 80px">{{ $report->places[$i]->number_place }}</td>
+                                                                    <td style="width: 100px">{{ $report->places[$i]->ticket_id }}</td>
+                                                                    <td style="width: 80px">{{ $report->places[$i]->sum }}</td>
+                                                                </tr>
+                                                                @if($report->places[$i]->name_benefit)
+                                                                    <tr style="background-color: rgba(0,0,0,.05);">
+                                                                        <td colspan="5" style="border-top: none;"> <span class="ml-md-5">{{ $report->places[$i]->num_certificate}}/{{ $report->places[$i]->name_benefit }}/{{ $report->places[$i]->name_passenger }} </span></td>
+                                                                    </tr>
+                                                                @endif
+                                                        @endfor
+
                                                         </tbody>
-                                                    </table>
-                                                </div>
-                                                <div class="col-lg-6">
-                                                    <table class="table table-sm">
-                                                        {{--<thead>--}}
-                                                        {{--<tr>--}}
-                                                        {{--<th style="width: 40px">#</th>--}}
-                                                        {{--<th>Зупинка</th>--}}
-                                                        {{--<th style="width: 80px">Місце</th>--}}
-                                                        {{--<th style="width: 100px">Номер квитка</th>--}}
-                                                        {{--<th style="width: 80px">Сума</th>--}}
-                                                        {{--</tr>--}}
-                                                        {{--</thead>--}}
-                                                        <tbody>
-                                                        <tr>
-                                                            <td style="width: 40px">5.</td>
-                                                            <td>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Error, maiores?</td>
-                                                            <td style="width: 80px">1</td>
-                                                            <td style="width: 100px">93/65879</td>
-                                                            <td style="width: 80px">99125,32</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>6.</td>
-                                                            <td>Рівне</td>
-                                                            <td>1</td>
-                                                            <td>93/65879</td>
-                                                            <td>125,32</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>7.</td>
-                                                            <td>Житомир</td>
-                                                            <td>1</td>
-                                                            <td>9/679</td>
-                                                            <td>125,32</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>8.</td>
-                                                            <td>Рівне</td>
-                                                            <td>1</td>
-                                                            <td>93/65879</td>
-                                                            <td>125,32</td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                                                        </table>
+                                                        </div>
+                                                    @endif
+                                                @else
+                                                   Оопс! В цій відомості пасажирів не виявлено ...
+                                                @endif
                                             </div>
                                         </div>
                                         <!-- /.card-body -->
@@ -283,7 +270,9 @@
                                 @empty
                                     <p>Відомостей не знайдено...</p>
                                 @endforelse
-                                    {{ $reports->links() }}
+                            </div>
+                            <div class="col-12 mt-2">
+                                {{ $reports->links() }}
                             </div>
                             <!-- /.col -->
                         </div>
@@ -374,8 +363,8 @@
                         ],
                         "firstDay": 1
                     },
-                    "startDate": "{{ $startDate }}",
-                    "endDate": "{{ $endDate }}",
+                    "startDate": "{{ $dateStart ? $dateStart->format('d/m/Y') : $startDateDefault }}",
+                    "endDate": "{{ $dateFinish ? $dateFinish->format('d/m/Y') : $endDateDefault}}",
                     "maxDate": "{{ $maxDate }}"
                 }, function (start, end, label) {
                     // console.log('New date range selected: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label + ')');

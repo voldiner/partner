@@ -21,8 +21,8 @@ class ReportController extends Controller
         $numberReport = null;
         $sum_report = null;
         $stationsSelected = null;
-        $dateS = null;
-        $dateF = null;
+        $dateStart = null;
+        $dateFinish = null;
         if ($request->hasAny(['sum_report','number_report','stations','data-range'])){
             $query = Report::query();
             // ---- підготовка масиву умов відбору and --------
@@ -32,8 +32,6 @@ class ReportController extends Controller
                 $dateFinish = Carbon::createFromFormat('d/m/Y', $request->get('dateFinish'));
                 $conditionsAnd[] = ['date_flight', '>=', $dateStart];
                 $conditionsAnd[] = ['date_flight', '<=', $dateFinish];
-                $dateS = $dateStart->format('d.m.Y');
-                $dateF = $dateFinish->format('d.m.Y');
             }
             if ($request->number_report) {
                 $conditionsAnd[] = ['num_report', '=', $request->number_report];
@@ -49,36 +47,44 @@ class ReportController extends Controller
                 $query->whereIn('station_id',$request->get('stations'));
                 $stationsSelected = Station::whereIn('id',$request->get('stations'))->get();
             }
-            $query->orderBy('date_flight')
-                  ->with('station');
-
-            //dd($reports);
-
 
         }else{
-            $query = Report::query();
+            // до 20 останніх записів
+            $last_report = Report::query()->orderBy('id', 'desc')->first();
+            if ($last_report){
+                $last_reportsID = $last_report->id;
+                $query = Report::query()->where('id', '>' , $last_reportsID-20);
+            }else{
+                $query = Report::query();
+            }
+
         }
         $countReports = $query->count();
-        $reports = $query->paginate(5)->withQueryString();
+
+        $reports = $query->withCount('places')
+                 ->orderBy('date_flight')
+                 ->with('station')
+                 ->with('places')
+                 ->paginate(8)
+                 ->withQueryString();
 
         $maxDate = Carbon::createFromTimestamp(time())->format('d/m/Y');
-        $startDate = Carbon::createFromTimestamp(time())->subDay(30)->format('d/m/Y');
-        $endDate = Carbon::createFromTimestamp(time())->format('d/m/Y');
-
+        $startDateDefault = Carbon::createFromTimestamp(time())->subDay(30)->format('d/m/Y');
+        $endDateDefault = Carbon::createFromTimestamp(time())->format('d/m/Y');
 
         return view('reports', compact
         (
             'maxDate',
-            'startDate',
-            'endDate',
+            'startDateDefault',
+            'endDateDefault',
             'stationsFromSelect',
             'reports',
             'countReports',
             'numberReport',
             'sum_report',
             'stationsSelected',
-            'dateS',
-            'dateF'
+            'dateStart',
+            'dateFinish'
         ));
     }
 
