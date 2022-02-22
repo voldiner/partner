@@ -13,6 +13,8 @@ use App\Models\Place;
 use App\Models\Report;
 use App\Models\Station;
 use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use XBase\TableReader;
 use Illuminate\Database\Eloquent\Collection;
@@ -21,10 +23,17 @@ use Illuminate\Database\Eloquent\Model;
 class ReportRepository
 {
     public $warnings;
+    public $numberReport, $sum_report, $stationsSelected, $dateStart, $dateFinish, $countReports;
 
     public function __construct()
     {
         $this->warnings = [];
+        $this->numberReport = null;
+        $this->sum_report = null;
+        $this->stationsSelected = null;
+        $this->dateStart = null;
+        $this->dateFinish = null;
+        $this->countReports = null;
     }
 
     /**
@@ -265,7 +274,7 @@ class ReportRepository
         $report->station_id = $station->id;
     }
 
-    public function moveToArchive($nameReportfile, $namePlacesfile, $nameReportArchive, $namePlacesArchive,$loggingRepository)
+    public function moveToArchive($nameReportfile, $namePlacesfile, $nameReportArchive, $namePlacesArchive, $loggingRepository)
     {
         $nameReportArchive = 'reports/' . date("Y_m_d_H_i_s_") . $nameReportArchive;
         $namePlacesArchive = 'reports/' . date("Y_m_d_H_i_s_") . $namePlacesArchive;
@@ -287,9 +296,80 @@ class ReportRepository
     public function createDataResponce(string $message, array $warnings)
     {
         $result = ['success' => $message];
-       if (count($warnings)){
-           $result['warnings'] = $warnings;
-       }
+        if (count($warnings)) {
+            $result['warnings'] = $warnings;
+        }
         return $result;
+    }
+
+    public function getStationsForSelect()
+    {
+        $result = Station::all()->pluck('name', 'id');
+        return $result;
+    }
+
+    public function getReportsFromQuery(Request $request, $withPlaces = true, $isPaginator = true)
+    {
+        // todo добавити відбір по id перевізника user_id
+        $last_reports_to_view = config('partner.last_reports_to_view');
+        $reports_to_page = config('partner.reports_to_page');
+        if ($request->hasAny(['sum_report', 'number_report', 'stations', 'data-range'])) {
+            $query = Report::query();
+            // ---- підготовка масиву умов відбору and --------
+            $conditionsAnd = [];
+            if ($request->has('interval')) {
+                $this->dateStart = Carbon::createFromFormat('d/m/Y', $request->get('dateStart'));
+                $this->dateFinish = Carbon::createFromFormat('d/m/Y', $request->get('dateFinish'));
+                $conditionsAnd[] = ['date_flight', '>=', $this->dateStart];
+                $conditionsAnd[] = ['date_flight', '<=', $this->dateFinish];
+            }
+            if ($request->number_report) {
+                $conditionsAnd[] = ['num_report', '=', $request->number_report];
+                $this->numberReport = $request->number_report;
+            }
+            if ($request->sum_report) {
+                $conditionsAnd[] = ['sum_tariff', '=', $request->sum_report];
+                $this->sum_report = $request->sum_report;
+            }
+            $query->where($conditionsAnd);
+            // ----------- OR statement ------------------------- //
+            if ($request->has('stations')) {
+                $query->whereIn('station_id', $request->get('stations'));
+                $this->stationsSelected = Station::whereIn('id', $request->get('stations'))->get();
+            }
+
+        } else {
+            // до 20 останніх записів
+            $last_report = Report::query()->orderBy('id', 'desc')->first();
+            if ($last_report) {
+                $last_reportsID = $last_report->id;
+                $query = Report::query()->where('id', '>', $last_reportsID - $last_reports_to_view);
+            } else {
+                $query = Report::query();
+            }
+
+        }
+        $this->countReports = $query->count();
+
+        if ($withPlaces) {
+            $reports = $query->withCount('places')
+                ->orderBy('date_flight')
+                ->with('station')
+                ->with('places');
+
+        } else {
+            $reports = $query->orderBy('date_flight')
+                ->with('station');
+        }
+        if ($isPaginator) {
+            $reports = $query
+                ->paginate($reports_to_page)
+                ->withQueryString();
+        } else {
+            $reports = $query->get();
+        }
+
+        return $reports;
+
     }
 }

@@ -8,65 +8,26 @@ use App\Models\Station;
 use App\Repositories\LoggingRepository;
 use App\Repositories\NotificationRepository;
 use App\Repositories\ReportRepository;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
-    public function index(ReportsSearchRequest $request)
+    public function index(ReportsSearchRequest $request, ReportRepository $reportRepository)
     {
-        //dump($request->all());
-        $stationsFromSelect = Station::all()->pluck('name', 'id');
-        $numberReport = null;
-        $sum_report = null;
-        $stationsSelected = null;
-        $dateStart = null;
-        $dateFinish = null;
-        if ($request->hasAny(['sum_report','number_report','stations','data-range'])){
-            $query = Report::query();
-            // ---- підготовка масиву умов відбору and --------
-            $conditionsAnd = [];
-            if ($request->has('interval')) {
-                $dateStart = Carbon::createFromFormat('d/m/Y', $request->get('dateStart'));
-                $dateFinish = Carbon::createFromFormat('d/m/Y', $request->get('dateFinish'));
-                $conditionsAnd[] = ['date_flight', '>=', $dateStart];
-                $conditionsAnd[] = ['date_flight', '<=', $dateFinish];
-            }
-            if ($request->number_report) {
-                $conditionsAnd[] = ['num_report', '=', $request->number_report];
-                $numberReport = $request->number_report;
-            }
-            if ($request->sum_report) {
-                $conditionsAnd[] = ['sum_tariff', '=', $request->sum_report];
-                $sum_report = $request->sum_report;
-            }
-            $query->where($conditionsAnd);
-            // ----------- OR statement ------------------------- //
-            if ($request->has('stations')) {
-                $query->whereIn('station_id',$request->get('stations'));
-                $stationsSelected = Station::whereIn('id',$request->get('stations'))->get();
-            }
+        $urlCreatePdfList = route('reports.createList') . '?' . ($request->getQueryString());
+        $stationsFromSelect = $reportRepository->getStationsForSelect();
 
-        }else{
-            // до 20 останніх записів
-            $last_report = Report::query()->orderBy('id', 'desc')->first();
-            if ($last_report){
-                $last_reportsID = $last_report->id;
-                $query = Report::query()->where('id', '>' , $last_reportsID-20);
-            }else{
-                $query = Report::query();
-            }
+        $reports = $reportRepository->getReportsFromQuery($request);
 
-        }
-        $countReports = $query->count();
-
-        $reports = $query->withCount('places')
-                 ->orderBy('date_flight')
-                 ->with('station')
-                 ->with('places')
-                 ->paginate(8)
-                 ->withQueryString();
+        $numberReport = $reportRepository->numberReport;
+        $sum_report = $reportRepository->sum_report;
+        $stationsSelected = $reportRepository->stationsSelected;
+        $dateStart = $reportRepository->dateStart;
+        $dateFinish = $reportRepository->dateFinish;
+        $countReports = $reportRepository->countReports;
 
         $maxDate = Carbon::createFromTimestamp(time())->format('d/m/Y');
         $startDateDefault = Carbon::createFromTimestamp(time())->subDay(30)->format('d/m/Y');
@@ -84,7 +45,8 @@ class ReportController extends Controller
             'sum_report',
             'stationsSelected',
             'dateStart',
-            'dateFinish'
+            'dateFinish',
+            'urlCreatePdfList'
         ));
     }
 
@@ -150,6 +112,47 @@ class ReportController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
 
+    }
+
+    public function createReportsList(ReportsSearchRequest $request, ReportRepository $reportRepository)
+    {
+        $reports = $reportRepository->getReportsFromQuery($request, false, false);
+
+        $numberReport = $reportRepository->numberReport;
+        $sum_report = $reportRepository->sum_report;
+        $stationsSelected = $reportRepository->stationsSelected;
+        $dateStart = $reportRepository->dateStart;
+        $dateFinish = $reportRepository->dateFinish;
+        $countReports = $reportRepository->countReports;
+/*
+        $pdf = PDF::loadView('pdf.reportsList', compact
+        (
+            'reports',
+            'countReports',
+            'numberReport',
+            'sum_report',
+            'stationsSelected',
+            'dateStart',
+            'dateFinish'
+
+        ));*/
+        //$pdf->set_option('defaultFont', 'times');
+        //return $pdf->download('reportList.pdf');
+
+
+        return view('pdf.reportsList', compact
+        (
+            'reports',
+            'countReports',
+            'numberReport',
+            'sum_report',
+            'stationsSelected',
+            'dateStart',
+            'dateFinish'
+
+        ));
+
+        //return Storage::download('tmp/test.pdf', 'download.pdf');
     }
 
 
