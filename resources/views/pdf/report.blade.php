@@ -7,10 +7,10 @@
     <title>report list</title>
     <style>
 
-       body {
-           font-family: DejaVu Sans;
-           font-size: 12px;
-       }
+        body {
+            font-family: DejaVu Sans;
+            font-size: 12px;
+        }
         .suma {
             width: 80px;
 
@@ -18,15 +18,24 @@
         .table-list{
             text-align: center;
         }
-       .page-break {
-           page-break-after: always;
-       }
+        .page-break {
+            page-break-after: always;
+        }
 
     </style>
 </head>
 <body>
-<h1>Реєстр касових відомостей продажу квитків на автобуси</h1>
-<h2> Перевізник: {{ auth()->user()->full_name }}</h2>
+<h2>{{ $report->station->name }}</h2>
+<h2>Відомість № {{ $report-> }}</h2>
+<h2>продажу квитків на рейс № {{ $report-> }}</h2>
+<h3>{{ $report-> }}</h3>
+<p>час відправлення {{  }}</p>
+<p>Дата {{ $report-> }}</p>
+<p>Перевізник: {{ $report->user->full_name }}</p>
+
+
+
+
 <p>Обрано {{ $countReports }} відомостей згідно умов пошуку:</p>
 <p>
     @if($stationsSelected || $numberReport || $sum_report || $dateStart || $dateFinish)

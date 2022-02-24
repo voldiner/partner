@@ -94,6 +94,7 @@ class ReportRepository
                 continue;
             }
             // ----- визначим додавати нову відомість чи коректувати стару ------- //
+            // todo добавити умову по автостанції
             $report = Report::where([
                 ['kod_flight', '=', $record->get('kr')],
                 ['time_flight', '=', $record->get('vr')],

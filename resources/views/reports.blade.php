@@ -240,8 +240,8 @@
                                                                 </tbody>
                                                             </table>
                                                         </div>
+                                                        <div class="col-lg-6">
                                                         @if($countCol2 > 0)
-                                                            <div class="col-lg-6">
                                                                 <table class="table table-sm">
                                                                     <tbody>
                                                                     @for($i = $countCol1; $i < $countCol1 + $countCol2; $i++)
@@ -261,8 +261,13 @@
 
                                                                     </tbody>
                                                                 </table>
-                                                            </div>
                                                         @endif
+                                                            <a class="btn btn-success" id="pdf-list" href="{{ route('reports.show', $report->id) }}">
+                                                                <i class="fas fa-download">
+                                                                </i>
+                                                                Друк PDF
+                                                            </a>
+                                                        </div>
                                                     @else
                                                         Оопс! В цій відомості пасажирів не виявлено ...
                                                     @endif

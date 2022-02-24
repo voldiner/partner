@@ -27,6 +27,7 @@ Route::middleware(['auth:web', 'verifiedEmail'])->group(function (){
     Route::post('users/changePassword', [\App\Http\Controllers\UserController::class, 'changePassword'])->name('changePassword');
     Route::get('reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/createList', [\App\Http\Controllers\ReportController::class, 'createReportsList'])->name('reports.createList');
+    Route::get('reports/{id}', [\App\Http\Controllers\ReportController::class, 'createReportPdf'])->name('reports.show');
 });
 
 

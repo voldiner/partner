@@ -10,6 +10,7 @@ use App\Repositories\NotificationRepository;
 use App\Repositories\ReportRepository;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use function Composer\Autoload\includeFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -124,7 +125,7 @@ class ReportController extends Controller
         $dateStart = $reportRepository->dateStart;
         $dateFinish = $reportRepository->dateFinish;
         $countReports = $reportRepository->countReports;
-/*
+
         $pdf = PDF::loadView('pdf.reportsList', compact
         (
             'reports',
@@ -135,11 +136,11 @@ class ReportController extends Controller
             'dateStart',
             'dateFinish'
 
-        ));*/
+        ));
         //$pdf->set_option('defaultFont', 'times');
-        //return $pdf->download('reportList.pdf');
+        return $pdf->download('reportList.pdf');
 
-
+/*
         return view('pdf.reportsList', compact
         (
             'reports',
@@ -150,9 +151,23 @@ class ReportController extends Controller
             'dateStart',
             'dateFinish'
 
-        ));
+        ));*/
 
         //return Storage::download('tmp/test.pdf', 'download.pdf');
+    }
+
+    public function createReportPdf($id)
+    {
+        if (!is_integer($id)){
+            abort(404);
+        }
+        $report = Report::findOrFail($id);
+
+        if ($report->user_id !== auth()->user()->id){
+            abort(403);
+        }
+
+        return view('pdf.report', compact('report'));
     }
 
 
