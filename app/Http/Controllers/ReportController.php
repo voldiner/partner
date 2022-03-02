@@ -140,34 +140,67 @@ class ReportController extends Controller
         //$pdf->set_option('defaultFont', 'times');
         return $pdf->download('reportList.pdf');
 
-/*
-        return view('pdf.reportsList', compact
-        (
-            'reports',
-            'countReports',
-            'numberReport',
-            'sum_report',
-            'stationsSelected',
-            'dateStart',
-            'dateFinish'
+        /*
+                return view('pdf.reportsList', compact
+                (
+                    'reports',
+                    'countReports',
+                    'numberReport',
+                    'sum_report',
+                    'stationsSelected',
+                    'dateStart',
+                    'dateFinish'
 
-        ));*/
+                ));*/
 
         //return Storage::download('tmp/test.pdf', 'download.pdf');
     }
 
     public function createReportPdf($id)
     {
-        if (!is_integer($id)){
-            abort(404);
-        }
+//        if (!is_integer($id)) {
+//            abort(404);
+//        }
         $report = Report::findOrFail($id);
 
-        if ($report->user_id !== auth()->user()->id){
-            abort(403);
-        }
+//        if ($report->user_id !== auth()->user()->id) {
+//            abort(403);
+//        }
 
-        return view('pdf.report', compact('report'));
+        $places = $report->places;
+
+        $total['countAll'] = $places->count();
+        $total['sumAll'] = $places->sum(function ($place) {
+            return $place->sum;
+        });
+
+        $total['sum50'] = $places
+            ->where('sum_tariff', '>', 0)
+            ->where('name_benefit')
+            ->sum(function ($place) {
+                return $place->sum;
+            });
+        $total['count50'] = $places
+            ->where('sum_tariff', '>', 0)
+            ->where('name_benefit')
+            ->count();
+        $total['sum0'] = $places
+            ->where('sum_tariff', '=', 0)
+            ->where('name_benefit')
+            ->sum(function ($place) {
+                return $place->sum;
+            });
+        $total['count0'] = $places
+            ->where('sum_tariff', '=', 0)
+            ->where('name_benefit')
+            ->count();
+
+        $counted = $places->countBy('name_stop');
+
+        //dd($total, $counted);
+        $pdf = PDF::loadView('pdf.report', compact('report', 'places', 'total', 'counted'));
+        return $pdf->download('report.pdf');
+        //return view('pdf.report', compact('report', 'places', 'total', 'counted'));
     }
 
 
