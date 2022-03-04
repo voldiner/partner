@@ -158,14 +158,11 @@ class ReportController extends Controller
 
     public function createReportPdf($id)
     {
-//        if (!is_integer($id)) {
-//            abort(404);
-//        }
         $report = Report::findOrFail($id);
 
-//        if ($report->user_id !== auth()->user()->id) {
-//            abort(403);
-//        }
+        if ($report->user_id !== auth()->user()->id) {
+            abort(403);
+        }
 
         $places = $report->places;
 

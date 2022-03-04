@@ -246,7 +246,7 @@
                                                                     <tbody>
                                                                     @for($i = $countCol1; $i < $countCol1 + $countCol2; $i++)
                                                                         <tr style="background-color: rgba(0,0,0,.05);">
-                                                                            <td style="width: 40px">{{ $i }}.</td>
+                                                                            <td style="width: 40px">{{ $i+1 }}.</td>
                                                                             <td>{{ $report->places[$i]->name_stop }}</td>
                                                                             <td style="width: 80px">{{ $report->places[$i]->number_place }}</td>
                                                                             <td style="width: 100px">{{ $report->places[$i]->ticket_id }}</td>

@@ -311,7 +311,6 @@ class ReportRepository
 
     public function getReportsFromQuery(Request $request, $withPlaces = true, $isPaginator = true)
     {
-        // todo добавити відбір по id перевізника user_id
         $last_reports_to_view = config('partner.last_reports_to_view');
         $reports_to_page = config('partner.reports_to_page');
         if ($request->hasAny(['sum_report', 'number_report', 'stations', 'data-range'])) {
@@ -332,6 +331,7 @@ class ReportRepository
                 $conditionsAnd[] = ['sum_tariff', '=', $request->sum_report];
                 $this->sum_report = $request->sum_report;
             }
+            $conditionsAnd[] = ['user_id', '=', auth()->user()->id];
             $query->where($conditionsAnd);
             // ----------- OR statement ------------------------- //
             if ($request->has('stations')) {
@@ -341,15 +341,22 @@ class ReportRepository
 
         } else {
             // до 20 останніх записів
-            $last_report = Report::query()->orderBy('id', 'desc')->first();
-            if ($last_report) {
-                $last_reportsID = $last_report->id;
-                $query = Report::query()->where('id', '>', $last_reportsID - $last_reports_to_view);
+            $lastReport = Report::
+                where('user_id', '=', auth()->user()->id)
+                ->orderBy('id', 'desc')
+                ->skip($last_reports_to_view)
+                ->take(1)
+                ->get();
+
+            if ($lastReport->count() == 1) {
+                $lastReportID = $lastReport[0]->id;
+                $query = Report::query()->where('id', '>', $lastReportID);
             } else {
                 $query = Report::query();
             }
-
+            $query->where('user_id', '=', auth()->user()->id);
         }
+
         $this->countReports = $query->count();
 
         if ($withPlaces) {
