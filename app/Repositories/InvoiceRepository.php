@@ -79,9 +79,9 @@ class InvoiceRepository
             }
 
             $products = $this->getProductsFromDBF($record->get('number'), $tableProducts);
-            if (!$products) {
-                continue;
-            }
+            //if (!$products) {
+            //    continue;
+            //}
             // ----- визначим додавати нову відомість чи коректувати стару ------- //
             $invoice = Invoice::where([
                 ['kod_atp', '=', $record->get('atp')],
@@ -180,27 +180,45 @@ class InvoiceRepository
     protected function getProductsFromDBF($numInvoice, $table)
     {
         $result = [];
-        $table->moveTo(0);
+        $record = $table->moveTo(0);
+        $product = $this->createProduct($record, $numInvoice );
+        if ($product){
+            $result[] = $product;
+        }
         while ($record = $table->nextRecord()) {
-            if ($numInvoice === $record->get('invoice')) {
-                $stationID = $this->getStation($record)->id;
-                // todo обробка коли не знайшлося станції в продукт
-                $result[] = new Product([
-                    'num_invoice' => $record->get('invoice'),
-                    'kod_ac' => $record->get('kod_ac'),
-                    'sum_tariff' => $record->get('suma'),
-                    'sum_baggage' => $record->get('sumb'),
-                    'sum_insurance' => $record->get('zbir'),
-                    'station_id' => $stationID,
-                ]);
+            $product = $this->createProduct($record, $numInvoice );
+            if ($product){
+                $result[] = $product;
             }
         }
         if (count($result) === 0) {
             $this->warnings[] = " Error not found products invoice #{$numInvoice} ";
             dump(" Error not found products invoice #{$numInvoice}");
-            return false;
+            return $result;
+            //return false;
         }
         return $result;
+    }
+
+    protected function createProduct($record, $numInvoice)
+    {
+        if ($numInvoice === $record->get('invoice')) {
+            $stationID = $this->getStation($record)->id;
+            $result = new Product([
+                'num_invoice' => $record->get('invoice'),
+                'kod_ac' => $record->get('kod_ac'),
+                'sum_tariff' => $record->get('suma'),
+                'sum_baggage' => $record->get('sumb'),
+                'sum_insurance' => $record->get('zbir'),
+                'station_id' => $stationID,
+            ]);
+            return $result;
+
+        }else{
+            return false;
+        }
+
+
     }
 
     /**
@@ -212,8 +230,9 @@ class InvoiceRepository
     {
         $station = $this->stations->firstWhere('kod', '=', $record->get('kod_ac'));
         if (!$station) {
-            $this->warnings[] = "Error not found station_id " . $record->get('kod_ac') . " invoice #" . $record->get('number');
-            dump("Error not found station_id " . $record->get('kod_ac') . " invoice #" . $record->get('number'));
+            $station = $this->stations->firstWhere('kod', '=', 99);
+            $this->warnings[] = "Error not found station_id " . $record->get('kod_ac') . " invoice #" . $record->get('invoice');
+            dump("Error not found station_id " . $record->get('kod_ac') . " invoice #" . $record->get('invoice'));
         }
         return $station;
     }

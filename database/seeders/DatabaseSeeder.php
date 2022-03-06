@@ -82,6 +82,11 @@ class DatabaseSeeder extends Seeder
                     'kod' => 50,
                     'created_at' => now(),
                 ],
+                [
+                    'name' => 'АС не визначено',
+                    'kod' => 99,
+                    'created_at' => now(),
+                ],
             ]
         );
     }
