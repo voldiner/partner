@@ -10,14 +10,18 @@
     'email' => [
         'admin_email' => 'yura.voldiner@gmail.com',
         'warning_create_report_email' => 'service-vopas@ukr.net',
+        'warning_create_invoice_email' => 'service-vopas@ukr.net',
     ],
 
      /*
    |--------------------------------------------------------------------------
-   | директорія, куди завантажуються по FTP файли від корня проекту
+   | директорія, куди завантажуються по FTP файли
    |--------------------------------------------------------------------------
     */
      'download_users_file' => storage_path('app/downloads/users.dbf'),
+     'download_invoices_file' => 'invoices.dbf',
+     'download_products_file' => 'products.dbf',
+     'download_retentions_file' => 'retents.dbf',
 
      /*
     |--------------------------------------------------------------------------

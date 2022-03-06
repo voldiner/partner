@@ -24,7 +24,7 @@ class CreateProductsTable extends Migration
             $table->foreignId('station_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('invoice_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
 
-            $table->softDeletes();
+            //$table->softDeletes();
             $table->timestamps();
         });
     }

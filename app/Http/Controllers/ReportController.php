@@ -137,26 +137,11 @@ class ReportController extends Controller
             'dateFinish'
 
         ));
-        //$pdf->set_option('defaultFont', 'times');
+
         return $pdf->download('reportList.pdf');
-
-        /*
-                return view('pdf.reportsList', compact
-                (
-                    'reports',
-                    'countReports',
-                    'numberReport',
-                    'sum_report',
-                    'stationsSelected',
-                    'dateStart',
-                    'dateFinish'
-
-                ));*/
-
-        //return Storage::download('tmp/test.pdf', 'download.pdf');
     }
 
-    public function createReportPdf($id)
+    public function createReportPdf($id, ReportRepository $reportRepository)
     {
         $report = Report::findOrFail($id);
 
@@ -164,40 +149,12 @@ class ReportController extends Controller
             abort(403);
         }
 
-        $places = $report->places;
+       $places = $reportRepository->getPlacesForCreateReportPdf($report);
+       $total = $reportRepository->total;
+       $countedStops = $reportRepository->countedStops;
 
-        $total['countAll'] = $places->count();
-        $total['sumAll'] = $places->sum(function ($place) {
-            return $place->sum;
-        });
-
-        $total['sum50'] = $places
-            ->where('sum_tariff', '>', 0)
-            ->where('name_benefit')
-            ->sum(function ($place) {
-                return $place->sum;
-            });
-        $total['count50'] = $places
-            ->where('sum_tariff', '>', 0)
-            ->where('name_benefit')
-            ->count();
-        $total['sum0'] = $places
-            ->where('sum_tariff', '=', 0)
-            ->where('name_benefit')
-            ->sum(function ($place) {
-                return $place->sum;
-            });
-        $total['count0'] = $places
-            ->where('sum_tariff', '=', 0)
-            ->where('name_benefit')
-            ->count();
-
-        $counted = $places->countBy('name_stop');
-
-        //dd($total, $counted);
-        $pdf = PDF::loadView('pdf.report', compact('report', 'places', 'total', 'counted'));
+        $pdf = PDF::loadView('pdf.report', compact('report', 'places', 'total', 'countedStops'));
         return $pdf->download('report.pdf');
-        //return view('pdf.report', compact('report', 'places', 'total', 'counted'));
     }
 
 

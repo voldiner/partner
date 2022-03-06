@@ -24,7 +24,7 @@ class ReportRepository
 {
     public $warnings;
     public $numberReport, $sum_report, $stationsSelected, $dateStart, $dateFinish, $countReports;
-
+    public $total, $countedStops;
     public function __construct()
     {
         $this->warnings = [];
@@ -34,6 +34,8 @@ class ReportRepository
         $this->dateStart = null;
         $this->dateFinish = null;
         $this->countReports = null;
+        $this->total = [];
+        $this->countedStops = null;
     }
 
     /**
@@ -75,7 +77,7 @@ class ReportRepository
 
             $countReportsAll++;
             // ------ валідація -------- //
-            if (!$this->validateRecord($record, $stations, $users)) {
+            if (!$this->validateRecord($record)) {
                 continue;
             }
             $user_id = $this->getUserId($users, $record);
@@ -379,5 +381,40 @@ class ReportRepository
 
         return $reports;
 
+    }
+
+    public function getPlacesForCreateReportPdf(Report $report)
+    {
+        $places = $report->places;
+
+        $this->total['countAll'] = $places->count();
+        $this->total['sumAll'] = $places->sum(function ($place) {
+            return $place->sum;
+        });
+
+        $this->total['sum50'] = $places
+            ->where('sum_tariff', '>', 0)
+            ->where('name_benefit')
+            ->sum(function ($place) {
+                return $place->sum;
+            });
+        $this->total['count50'] = $places
+            ->where('sum_tariff', '>', 0)
+            ->where('name_benefit')
+            ->count();
+        $this->total['sum0'] = $places
+            ->where('sum_tariff', '=', 0)
+            ->where('name_benefit')
+            ->sum(function ($place) {
+                return $place->sum;
+            });
+        $this->total['count0'] = $places
+            ->where('sum_tariff', '=', 0)
+            ->where('name_benefit')
+            ->count();
+
+        $this->countedStops = $places->countBy('name_stop');
+
+        return $places;
     }
 }

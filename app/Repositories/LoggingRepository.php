@@ -24,4 +24,16 @@ class LoggingRepository
             Log::channel('download_reports')->debug($message);
         }
     }
+
+    public function createInvoicesLoggingMessage($message)
+    {
+        Log::channel('download_invoices')->debug($message);
+    }
+
+    public function createInvoicesLoggingMessages(array $messages)
+    {
+        foreach ($messages as $message) {
+            Log::channel('download_invoices')->debug($message);
+        }
+    }
 }

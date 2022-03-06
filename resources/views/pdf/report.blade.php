@@ -101,7 +101,7 @@
         <tr>
             <td colspan="3"><b><u>Продано квитків до:</u></b></td>
         </tr>
-        @forelse($counted as $key => $count)
+        @forelse($countedStops as $key => $count)
             <tr>
                 <td>{{ $key }}</td>
                 <td>{{ $count}}</td>

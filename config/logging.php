@@ -87,7 +87,11 @@ return [
             'path' => storage_path('logs/edit_users.log'),
             'level' => 'debug',
         ],
-
+        'download_invoices' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/download_invoices.log'),
+            'level' => 'debug',
+        ],
 
         // --------------
         'slack' => [
