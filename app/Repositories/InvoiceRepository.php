@@ -11,6 +11,7 @@ namespace App\Repositories;
 
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\Retention;
 use XBase\TableReader;
 use App\Models\Station;
 use App\Models\User;
@@ -82,6 +83,8 @@ class InvoiceRepository
             //if (!$products) {
             //    continue;
             //}
+            $retentions = $this->getRetentionsFromDbf($record->get('number'), $tableRetentions);
+
             // ----- визначим додавати нову відомість чи коректувати стару ------- //
             $invoice = Invoice::where([
                 ['kod_atp', '=', $record->get('atp')],
@@ -103,6 +106,7 @@ class InvoiceRepository
             $invoice->save();
 
             $invoice->products()->saveMany($products);
+            $invoice->retentions()->saveMany($retentions);
         }
         $timeWork = time() - $startTime;
         $result = "Processed {$countInvoicesAll} record. Add {$countInvoicesAdd} reports. Update {$countInvoicesUpdate} reports. Time {$timeWork} sec.";
@@ -181,13 +185,13 @@ class InvoiceRepository
     {
         $result = [];
         $record = $table->moveTo(0);
-        $product = $this->createProduct($record, $numInvoice );
-        if ($product){
+        $product = $this->createProduct($record, $numInvoice);
+        if ($product) {
             $result[] = $product;
         }
         while ($record = $table->nextRecord()) {
-            $product = $this->createProduct($record, $numInvoice );
-            if ($product){
+            $product = $this->createProduct($record, $numInvoice);
+            if ($product) {
                 $result[] = $product;
             }
         }
@@ -195,8 +199,29 @@ class InvoiceRepository
             $this->warnings[] = " Error not found products invoice #{$numInvoice} ";
             dump(" Error not found products invoice #{$numInvoice}");
             return $result;
-            //return false;
         }
+        return $result;
+    }
+
+    protected function getRetentionsFromDBF($numInvoice, $table)
+    {
+        $result = [];
+        $record = $table->moveTo(0);
+        $retention = $this->createRetention($record, $numInvoice );
+        if ($retention){
+            $result[] = $retention;
+        }
+        while ($record = $table->nextRecord()) {
+            $retention = $this->createRetention($record, $numInvoice );
+            if ($retention){
+                $result[] = $retention;
+            }
+        }
+       /* if (count($result) === 0) {
+            $this->warnings[] = " Error not found products invoice #{$numInvoice} ";
+            dump(" Error not found products invoice #{$numInvoice}");
+            return $result;
+        }*/
         return $result;
     }
 
@@ -213,14 +238,24 @@ class InvoiceRepository
                 'station_id' => $stationID,
             ]);
             return $result;
-
         }else{
             return false;
         }
-
-
     }
 
+    protected function createRetention($record, $numInvoice)
+    {
+        if ($numInvoice === $record->get('invoice')) {
+            $result = new Retention([
+                'num_invoice' => $record->get('invoice'),
+                'sum' => $record->get('suma'),
+                'name' => $record->get('name'),
+            ]);
+            return $result;
+        }else{
+            return false;
+        }
+    }
     /**
      * @param XBase\Record\DBaseRecord $record
      * @param Collection $stations
@@ -288,11 +323,13 @@ class InvoiceRepository
         $nameInvoiceArchive = 'invoices/' . date("Y_m_d_H_i_s_") . $nameReportsFile;
         $nameProductArchive = 'invoices/' . date("Y_m_d_H_i_s_") . $namePlacesFile;
         $nameRetentionArchive = 'invoices/' . date("Y_m_d_H_i_s_") . $nameRetentionsFile;
+
         try {
             //throw new \Exception('Testing exception!!!');
             Storage::move('downloads/' . $nameReportsFile, $nameInvoiceArchive);
             Storage::move('downloads/' . $namePlacesFile, $nameProductArchive);
             Storage::move('downloads/' . $nameRetentionsFile, $nameRetentionArchive);
+
         } catch (\Exception $e) {
             $loggingRepository->createInvoicesLoggingMessage($e->getMessage());
 

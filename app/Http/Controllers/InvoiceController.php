@@ -48,7 +48,7 @@ class InvoiceController extends Controller
        }
 
 
-      // try {
+       try {
 
            $message = $invoiceRepository->createInvoices($nameInvoicesfile, $nameProductsfile, $nameRetentionsfile);
            $loggingRepository->createReportsLoggingMessage($message);
@@ -59,17 +59,17 @@ class InvoiceController extends Controller
            $notificationRepository->createInvoicesNotification($invoiceRepository->warnings, $message);
 
            $invoiceRepository->moveToArchive(
-               $nameInvoicesfile,
-               $nameProductsfile,
-               $nameRetentionsfile,
+               config('partner.download_invoices_file'),
+               config('partner.download_products_file'),
+               config('partner.download_retentions_file'),
                $loggingRepository
            );
            return response()->json($toResponce, 200);
 
-      // } catch (\Exception $e) {
-     //      $loggingRepository->createInvoicesLoggingMessage($e->getMessage());
-      //     return response()->json(['error' => $e->getMessage()], 500);
-     //  }
+       } catch (\Exception $e) {
+           $loggingRepository->createInvoicesLoggingMessage($e->getMessage());
+           return response()->json(['error' => $e->getMessage()], 500);
+       }
 
    }
 
