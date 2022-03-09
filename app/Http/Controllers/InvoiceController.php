@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\InvoicesSearchRequest;
 use App\Repositories\InvoiceRepository;
 use App\Repositories\LoggingRepository;
 use App\Repositories\NotificationRepository;
@@ -19,67 +20,82 @@ class InvoiceController extends Controller
      * @return \Illuminate\Http\JsonResponse
      *
      */
-   public function createInvoices(
-       InvoiceRepository $invoiceRepository,
-       NotificationRepository $notificationRepository,
-       LoggingRepository $loggingRepository
-   )
-   {
+    public function createInvoices(
+        InvoiceRepository $invoiceRepository,
+        NotificationRepository $notificationRepository,
+        LoggingRepository $loggingRepository
+    )
+    {
 
-       $nameInvoicesfile = 'downloads/' . config('partner.download_invoices_file');
-       $nameProductsfile = 'downloads/' . config('partner.download_products_file');
-       $nameRetentionsfile = 'downloads/' . config('partner.download_retentions_file');
+        $nameInvoicesfile = 'downloads/' . config('partner.download_invoices_file');
+        $nameProductsfile = 'downloads/' . config('partner.download_products_file');
+        $nameRetentionsfile = 'downloads/' . config('partner.download_retentions_file');
 
-       if (Storage::missing($nameInvoicesfile)) {
-           $message = $nameInvoicesfile . ' not exist';
-           $loggingRepository->createReportsLoggingMessage($message);
-           return response()->json(['error' => $message], 404);
-       }
-       if (Storage::missing($nameProductsfile)) {
-           $message = $nameProductsfile . ' not exist';
-           $loggingRepository->createReportsLoggingMessage($message);
-           return response()->json(['error' => $message], 404);
-       }
+        if (Storage::missing($nameInvoicesfile)) {
+            $message = $nameInvoicesfile . ' not exist';
+            $loggingRepository->createReportsLoggingMessage($message);
+            return response()->json(['error' => $message], 404);
+        }
+        if (Storage::missing($nameProductsfile)) {
+            $message = $nameProductsfile . ' not exist';
+            $loggingRepository->createReportsLoggingMessage($message);
+            return response()->json(['error' => $message], 404);
+        }
 
-       if (Storage::missing($nameRetentionsfile)) {
-           $message = $nameRetentionsfile . ' not exist';
-           $loggingRepository->createReportsLoggingMessage($message);
-           return response()->json(['error' => $message], 404);
-       }
+        if (Storage::missing($nameRetentionsfile)) {
+            $message = $nameRetentionsfile . ' not exist';
+            $loggingRepository->createReportsLoggingMessage($message);
+            return response()->json(['error' => $message], 404);
+        }
 
 
-       try {
+        try {
 
-           $message = $invoiceRepository->createInvoices($nameInvoicesfile, $nameProductsfile, $nameRetentionsfile);
-           $loggingRepository->createReportsLoggingMessage($message);
-           $loggingRepository->createReportsLoggingMessages($invoiceRepository->warnings);
+            $message = $invoiceRepository->createInvoices($nameInvoicesfile, $nameProductsfile, $nameRetentionsfile);
+            $loggingRepository->createReportsLoggingMessage($message);
+            $loggingRepository->createReportsLoggingMessages($invoiceRepository->warnings);
 
-           $toResponce = $invoiceRepository->createDataResponce($message, $invoiceRepository->warnings);
+            $toResponce = $invoiceRepository->createDataResponce($message, $invoiceRepository->warnings);
 
-           $notificationRepository->createInvoicesNotification($invoiceRepository->warnings, $message);
+            $notificationRepository->createInvoicesNotification($invoiceRepository->warnings, $message);
 
-           $invoiceRepository->moveToArchive(
-               config('partner.download_invoices_file'),
-               config('partner.download_products_file'),
-               config('partner.download_retentions_file'),
-               $loggingRepository
-           );
-           return response()->json($toResponce, 200);
+            $invoiceRepository->moveToArchive(
+                config('partner.download_invoices_file'),
+                config('partner.download_products_file'),
+                config('partner.download_retentions_file'),
+                $loggingRepository
+            );
+            return response()->json($toResponce, 200);
 
-       } catch (\Exception $e) {
-           $loggingRepository->createInvoicesLoggingMessage($e->getMessage());
-           return response()->json(['error' => $e->getMessage()], 500);
-       }
+        } catch (\Exception $e) {
+            $loggingRepository->createInvoicesLoggingMessage($e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
 
-   }
+    }
 
-   public function index()
-   {
+    public function index(InvoicesSearchRequest $request, InvoiceRepository $invoiceRepository)
+    {
 
-   }
+        $invoices = $invoiceRepository->getInvoicesFromQuery($request);
 
-   public function createInvoicePdf($id)
-   {
+        $countInvoices = $invoiceRepository->countInvoices;
+        $monthsFromSelect = $invoiceRepository->monthsFromSelect;
+        $monthsSelected = $invoiceRepository->monthsSelected;
+        $year = $invoiceRepository->year;
+        return view('invoices', compact
+        (
+            'invoices',
+            'countInvoices',
+            'monthsFromSelect',
+            'monthsSelected',
+            'year'
+        ));
 
-   }
+    }
+
+    public function createInvoicePdf($id)
+    {
+
+    }
 }

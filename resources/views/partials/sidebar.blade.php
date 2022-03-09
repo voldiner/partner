@@ -84,6 +84,17 @@
                         </p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('invoices.index') }}" class="nav-link @if(Route::currentRouteName()== 'invoices.index') active @endif">
+                        <i class="nav-icon far fa-address-card"></i>
+                        <p>
+                            Акти виконаних робіт
+                            {{--<span class="right badge badge-danger">New</span>--}}
+                        </p>
+                    </a>
+                </li>
+
+
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="nav-icon far fa-plus-square"></i>

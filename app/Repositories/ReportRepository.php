@@ -9,6 +9,7 @@
 namespace App\Repositories;
 
 
+use App\Http\Requests\ReportsSearchRequest;
 use App\Models\Place;
 use App\Models\Report;
 use App\Models\Station;
@@ -311,7 +312,7 @@ class ReportRepository
         return $result;
     }
 
-    public function getReportsFromQuery(Request $request, $withPlaces = true, $isPaginator = true)
+    public function getReportsFromQuery(ReportsSearchRequest $request, $withPlaces = true, $isPaginator = true)
     {
         $last_reports_to_view = config('partner.last_reports_to_view');
         $reports_to_page = config('partner.reports_to_page');
