@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\InvoicesSearchRequest;
+use App\Models\Invoice;
 use App\Repositories\InvoiceRepository;
 use App\Repositories\LoggingRepository;
 use App\Repositories\NotificationRepository;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -94,8 +96,24 @@ class InvoiceController extends Controller
 
     }
 
-    public function createInvoicePdf($id)
+    public function createInvoicePdf($id, InvoiceRepository $invoiceRepository)
     {
 
+        $invoice = Invoice::where('id', $id)->with(['products','retentions'])->first();
+        if (!$invoice){
+            abort(404);
+        }
+
+        if ($invoice->user_id !== auth()->user()->id) {
+            abort(403);
+        }
+        $monthsFromSelect = $invoiceRepository->monthsFromSelect;
+
+        $pdf = PDF::loadView('pdf.invoice', compact(
+            'invoice',
+            'monthsFromSelect'
+        ));
+
+        return $pdf->download('invoice.pdf');
     }
 }

@@ -26,6 +26,7 @@ class CreateInvoicesTable extends Migration
             $table->decimal('balance_begin',12,2)->nullable()->comment('залишок на початок');
             $table->decimal('calculation_for_billing',12,2)->nullable()->comment('відрахування від виручки');
             $table->decimal('calculation_for_baggage',12,2)->nullable()->comment('відрахування від багажу');
+            $table->decimal('retention_for_collection',12,2)->nullable()->comment('утримано за інкасацію');
             $table->decimal('sum_for_transfer',12,2)->nullable()->comment('сума до перерахування');
             $table->decimal('sum_month_transfer',12,2)->nullable()->comment('перераховано за місяць');
             $table->decimal('get_cash',12,2)->nullable()->comment('отримано готівки');
