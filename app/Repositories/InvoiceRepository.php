@@ -372,7 +372,7 @@ class InvoiceRepository
             $query = Invoice::query();
             // ---- підготовка масиву умов відбору and --------
             $conditionsAnd = [];
-            if ($request->has('year')) {
+            if ($request->has('year') && (!is_null($request->get('year')))) {
                 $this->year = $request->get('year');
                 $conditionsAnd[] = ['year', '=', $request->get('year')];
             }

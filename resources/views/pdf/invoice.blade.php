@@ -6,17 +6,14 @@
 
     <title>report list</title>
     <style>
-
         body {
             font-family: DejaVu Sans;
             font-size: 12px;
         }
-
         .suma {
             width: 80px;
 
         }
-
         .table-list {
             text-align: center;
         }
@@ -33,6 +30,14 @@
         .total{
             background-color: rgba(0,0,0,.05);
             font-weight: bold;
+        }
+        .pidpisLeft{
+            float: left;
+            width: 40%;
+        }
+        .pidpisRight{
+            float: right;
+            width: 40%;
         }
     </style>
 </head>
@@ -60,7 +65,7 @@
     @php
         $total = [0 , 0, 0, 0];
     @endphp
-    <table>
+    <table border="1" cellspacing="0">
         <thead>
         <tr style="background-color: rgba(0,0,0,.05);">
             <th>Автостанція</th>
@@ -163,40 +168,44 @@
 </p>
 <p>В чому і підписали акт: </p>
 
+<div class="pidpisLeft">
+    <p> {{ $invoice->user->full_name }}</p>
+    @isset($invoice->user->address)
+        <p class="mb-1">{{ $invoice->user->address }}</p>
+    @endisset
+    @exist($invoice->user->identifier)
+    <p>Ідентифікаційний код {{ $invoice->user->identifier }}</p>
+    @endexist
+    @exist($invoice->user->certificate)
+    <p>Номер свідоцтва {{ $invoice->user->certificate }}</p>
+    @endexist
+    @exist($invoice->user->certificate_tax)
+    <p>Індивідуальний податковий номер {{ $invoice->user->certificate_tax }}</p>
+    @endexist
+    @exist($invoice->user->edrpou)
+    <p>ЄДРПОУ {{ $invoice->user->edrpou }}</p>
+    @endexist
+    @exist($invoice->user->telephone)
+    <p>тел. {{ $invoice->user->telephone }}</p>
+    @endexist
+    <p>
+        Підпис ______________ {{ $invoice->user->surname }}
+    </p>
+</div>
 
-<p> {{ $invoice->user->full_name }}</p>
-@isset($invoice->user->address)
-    <p class="mb-1">{{ $invoice->user->address }}</p>
-@endisset
-@exist($invoice->user->identifier)
-<p>Ідентифікаційний код {{ $invoice->user->identifier }}</p>
-@endexist
-@exist($invoice->user->certificate)
-<p>Номер свідоцтва {{ $invoice->user->certificate }}</p>
-@endexist
-@exist($invoice->user->certificate_tax)
-<p>Індивідуальний податковий номер {{ $invoice->user->certificate_tax }}</p>
-@endexist
-@exist($invoice->user->edrpou)
-<p>ЄДРПОУ {{ $invoice->user->edrpou }}</p>
-@endexist
-@exist($invoice->user->telephone)
-<p>тел. {{ $invoice->user->telephone }}</p>
-@endexist
-<p>
-    Підпис ______________ {{ $invoice->user->surname }}
-</p>
+<div class="pidpisRight">
+    <p>
+        Приватне акціонерне товариство "Волинське обласне підприємство
+        автобусних станцій"
+    </p>
+    <p> м.Луцьк, вул. Львівська, 148</p>
+    <p> код ЄДРПОУ 03113130</p>
+    <p> ІПН 031131303172, свідоцтво № 100337934</p>
+    <p> р/р UA63033980000026009300331234, Волинське ОУ АТ "Ощадбанк"</p>
+    <p>
+        Заст. гол.бухгалтера ______________ Боярська Н.В.
+    </p>
+</div>
 
-<p>
-    Приватне акціонерне товариство "Волинське обласне підприємство
-    автобусних станцій"
-</p>
-<p> м.Луцьк, вул. Львівська, 148</p>
-<p> код ЄДРПОУ 03113130</p>
-<p> ІПН 031131303172, свідоцтво № 100337934</p>
-<p> р/р UA63033980000026009300331234, Волинське ОУ АТ "Ощадбанк"</p>
-<p>
-    Заст. гол.бухгалтера ______________ Боярська Н.В.
-</p>
 </body>
 </html>

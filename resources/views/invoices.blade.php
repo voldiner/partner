@@ -154,7 +154,7 @@
                                             <div class="col-auto text-left">
                                                 на суму
                                             </div>
-                                            <div class="col-auto text-left">
+                                            <div class="col-auto">
                                                  {{ number_format($invoice->sum_for_transfer, 2, '.', ' ') }}
                                             </div>
                                             <div class="card-tools col text-right">
