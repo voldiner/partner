@@ -40,6 +40,8 @@ Route::middleware(['auth:web', 'verifiedEmail'])->group(function (){
     // --- invoices
     Route::get('invoices', [\App\Http\Controllers\InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('invoices/{id}', [\App\Http\Controllers\InvoiceController::class, 'createInvoicePdf'])->name('invoices.show');
+    // --- places
+    Route::get('places', [\App\Http\Controllers\PlaceController::class, 'index'])->name('places.index');
 });
 
 

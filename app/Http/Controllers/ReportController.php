@@ -4,13 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ReportsSearchRequest;
 use App\Models\Report;
-use App\Models\Station;
+
 use App\Repositories\LoggingRepository;
 use App\Repositories\NotificationRepository;
 use App\Repositories\ReportRepository;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-use function Composer\Autoload\includeFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 

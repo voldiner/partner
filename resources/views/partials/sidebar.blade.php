@@ -93,7 +93,15 @@
                         </p>
                     </a>
                 </li>
-
+                <li class="nav-item">
+                    <a href="{{ route('places.index') }}" class="nav-link @if(Route::currentRouteName()== 'places.index') active @endif">
+                        <i class="nav-icon far fa-address-card"></i>
+                        <p>
+                            Квитки
+                            {{--<span class="right badge badge-danger">New</span>--}}
+                        </p>
+                    </a>
+                </li>
 
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
