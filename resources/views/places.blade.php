@@ -150,7 +150,7 @@
                                         <div class="card card-gray rounded-pill">
                                             <div class="card-header rounded-pill">
                                                 <p class="card-title">
-                                                    <a class="btn btn-danger btn-sm" href="{{ route('reports.index') }}">
+                                                    <a class="btn btn-danger btn-sm" href="{{ route('places.index') }}">
                                                         <i class="fas fa-trash">
                                                         </i>
                                                         Скасувати
@@ -171,7 +171,10 @@
                                                         <span class="badge badge-warning mt-1" style="font-size: 100%;">куди: {{ $final }}</span>
                                                     @endif
                                                     @if($surname)
-                                                        <span class="badge badge-warning mt-1" style="font-size: 100%;">пільговик: {{ $surname }}</span>
+                                                        <span class="badge badge-warning mt-1" style="font-size: 100%;">пільговик
+                                                            @if($is_number) номер посвідчення @endif
+                                                            @if($is_surname) прізвище @endif
+                                                            : {{ $surname }}</span>
                                                     @endif
                                                 </p>
 
@@ -184,26 +187,65 @@
                                     @endif
                                 </div>
                             </div>
+
                             <!-- /.col -->
                             <div class="row">
+                                <div class="col-12">
+                                    @forelse ($places as $key => $place)
+                                        <div class="card card-info collapsed-card mb-1">
+                                            <div class="card-header">
+                                                <div class="row justify-content-between">
+                                                    <div class="col-xl-2 col-md-3 col-sm-6 border-right text-xl-left text-center ">
+                                                        <span style="margin-right: 15px;">{{ $key + 1 }}.</span>
+                                                        {{ $place['date_flight']->format('d-m-Y') }}
+                                                    </div>
+                                                    <div class="col-xl-4 col-md-5 col-sm-6 border-right text-center">
+                                                        {{ $place['name_flight'] }} {{ $place['time_flight'] }}
+                                                    </div>
+                                                    <div class="col-xl-3 col-md-4 col-sm-6 border-right text-center">
+                                                        від: {{ $place['start'] }} до: {{ $place['name_stop'] }}
+                                                    </div>
+                                                    <div class="col-xl-1 col-md-3 col-sm-6 border-right text-center p-0">
+                                                         {{ $place['ticket_id'] }}
+                                                    </div>
+                                                    <div class="col-xl-1 col-md-5 col-sm-6 border-right text-center">
+                                                        {{ $place['sum'] }}
+                                                    </div>
+                                                    <div class="col-xl-1 col-md-4 col-sm-6 text-center">
+                                                        місце: {{ $place['number_place'] }}
+                                                    </div>
+                                                </div>
+                                                @if($place['name_benefit'])
+                                                    <div class="row">
+                                                        <div class="col-12 text-center text-sm-left">
+                                                            {{ $place['name_benefit'] }} / {{ $place['num_certificate'] }} / {{ $place['name_passenger'] }}
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <!-- /.card-header -->
 
+                                            <!-- /.card-body -->
+                                        </div>
+                                    @empty
 
-
-
-
-
-
-
-                            </div>
-                            <div class="row">
-                                <div class="col-md-9 mt-2">
-                                    {{--{{ $reports->links() }}--}}
+                                    @endforelse
                                 </div>
                             </div>
-
-                            <!-- /.col -->
-                        {{--</div>--}}
-                        <!-- /.row -->
+                            @if(count($places))
+                            <div class="row justify-content-between">
+                                <div class="col-3">
+                                    <a class="btn btn-app m-0 disabled" href="{{ route('places.index') }}">
+                                        <i class="fas fa-angle-double-left"></i> Попередній
+                                    </a>
+                                </div>
+                                <div class="col-3 text-right">
+                                    <a class="btn btn-app">
+                                        <i class="fas fa-angle-double-right"></i> Наступний
+                                    </a>
+                                </div>
+                            </div>
+                            @endif
                     </div>
                 </section>
                 <!-- /.content -->
