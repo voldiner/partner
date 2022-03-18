@@ -5,6 +5,13 @@
         {{ session('status') }}
     </div>
 @endif
+@if (isset($message) && $message)
+    <div class="alert alert-info alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h5><i class="icon fas fa-info"></i> Інформація</h5>
+        {{ $message }}
+    </div>
+@endif
 @if (session('error'))
     <div class="alert alert-danger alert-dismissible">
         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>

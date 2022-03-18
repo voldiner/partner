@@ -14,11 +14,10 @@ use Carbon\Carbon;
 use App\Http\Requests\PlacesSearchRequest;
 use App\Models\Station;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Session;
 
 class PlaceRepository
 {
-    public $stationsSelected, $dateStart, $dateFinish, $countPlaces, $numberPlace, $final, $surname, $places_to_view, $is_surname, $is_number;
+    public $stationsSelected, $dateStart, $dateFinish, $countPlaces, $numberPlace, $final, $surname, $places_to_view, $is_surname, $is_number, $message;
     protected $result;
     public function __construct()
     {
@@ -33,6 +32,7 @@ class PlaceRepository
         $this->result = [];
         $this->is_surname = false;
         $this->is_number = false;
+        $this->message = null;
     }
 
     public function getStationsForSelect()
@@ -43,7 +43,6 @@ class PlaceRepository
 
     public function getPlacesFromQuery(PlacesSearchRequest $request)
     {
-        $places_to_page = config('partner.places_to_page');
         $this->numberPlace = !empty($request->number_place) ? $request->number_place : null;
         $this->final = !empty($request->final) ? str_replace(['і','І'], ['i', 'I'], $request->final) : null;
         $this->surname = !empty($request->surname) ? str_replace(['і','І'], ['i', 'I'], $request->surname) : null;
@@ -135,5 +134,57 @@ class PlaceRepository
 
 
         return $this->result;
+    }
+
+    public function createMessage($places)
+    {
+        if (count($places) >= $this->places_to_view){
+            $this->message = "Увага! По запиту знайдено значну кількість квитків. 
+            Для перегляду буде видано тільки {$this->places_to_view}. Уточніть будь ласка запит.";
+        }else{
+            $this->message = null;
+        }
+    }
+
+    public function paginate(PlacesSearchRequest $request)
+    {
+        $places_to_page = config('partner.places_to_page', 10);
+        $lastPage = ceil(count($this->result) / $places_to_page);
+        $getParameters = $request->except('page');
+        $countPlaces = count($this->result);
+        if (!$request->has('page')){
+            $currentPage = 1;
+        }else{
+            $currentPage = intval($request->input('page'));
+        }
+        if ($currentPage <= 0 || $currentPage > $lastPage){
+            $currentPage = 1;
+        }
+
+        $prevPage = $currentPage - 1;
+        $nextPage = $currentPage + 1;
+
+        $prevPage = $prevPage <= 0 ? null : $prevPage;
+        $nextPage = $nextPage > $lastPage ? null : $nextPage;
+
+        $result ['next'] = $this->buildUrl($getParameters, $nextPage);
+        $result ['prev'] = $this->buildUrl($getParameters, $prevPage);
+        $result ['start_key'] = ($currentPage - 1) * $places_to_page;
+        $result ['end_key'] = (($places_to_page * $currentPage) - 1);
+        $result ['end_key'] = $result['end_key'] > $countPlaces ? $countPlaces - 1 : $result['end_key'];
+        $result ['currentPage'] = $currentPage;
+        $result ['lastPage'] = $lastPage;
+        $result ['places_to_page'] = $places_to_page;
+        return $result;
+    }
+
+    protected function buildUrl($input, $numPage)
+    {
+        if (is_null($numPage)){
+            return $numPage;
+        }
+        $input['page'] = $numPage;
+        $result = route('places.index') . '?' . http_build_query($input);
+        return $result;
     }
 }

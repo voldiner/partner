@@ -18,13 +18,9 @@ class PlaceController extends Controller
 
         $places = $placeRepository->getPlacesFromQuery($request);
         //dd($places);
-        if (count($places) >= $placeRepository->places_to_view){
-            Session::flash('status', "Увага! По запиту знайдено значну кількість квитків. 
-            Для перегляду буде видано тільки {$placeRepository->places_to_view}. Уточніть будь ласка запит.");
-        }else{
-            Session::forget('status');
-        }
-
+        $paginateLinks = $placeRepository->paginate($request);
+        $placeRepository->createMessage($places);
+        dump($paginateLinks);
         dump(count($places));
         //dump($request->getQueryString());
         $stationsSelected = $placeRepository->stationsSelected;
@@ -36,7 +32,7 @@ class PlaceController extends Controller
         $surname = $placeRepository->surname;
         $is_surname = $placeRepository->is_surname;
         $is_number = $placeRepository->is_number;
-
+        $message = $placeRepository->message;
         $maxDate = Carbon::createFromTimestamp(time())->format('d/m/Y');
         $startDateDefault = Carbon::createFromTimestamp(time())->subDay(30)->format('d/m/Y');
         $endDateDefault = Carbon::createFromTimestamp(time())->format('d/m/Y');
@@ -57,7 +53,9 @@ class PlaceController extends Controller
             'surname',
             'is_surname',
             'is_number',
-            'places'
+            'places',
+            'message',
+            'paginateLinks'
         ));
     }
 

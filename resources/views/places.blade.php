@@ -191,34 +191,35 @@
                             <!-- /.col -->
                             <div class="row">
                                 <div class="col-12">
-                                    @forelse ($places as $key => $place)
+                                    @php $counter = (($paginateLinks['currentPage'] - 1) * $paginateLinks['places_to_page']) + 1; @endphp
+                                    @for ($i = $paginateLinks['start_key']; $i <= $paginateLinks['end_key']; $i++)
                                         <div class="card card-info collapsed-card mb-1">
                                             <div class="card-header">
                                                 <div class="row justify-content-between">
                                                     <div class="col-xl-2 col-md-3 col-sm-6 border-right text-xl-left text-center ">
-                                                        <span style="margin-right: 15px;">{{ $key + 1 }}.</span>
-                                                        {{ $place['date_flight']->format('d-m-Y') }}
+                                                        <span style="margin-right: 15px;">{{ $counter }}.</span>
+                                                        {{ $places[$i]['date_flight']->format('d-m-Y') }}
                                                     </div>
                                                     <div class="col-xl-4 col-md-5 col-sm-6 border-right text-center">
-                                                        {{ $place['name_flight'] }} {{ $place['time_flight'] }}
+                                                        {{ $places[$i]['name_flight'] }} {{ $places[$i]['time_flight'] }}
                                                     </div>
                                                     <div class="col-xl-3 col-md-4 col-sm-6 border-right text-center">
-                                                        від: {{ $place['start'] }} до: {{ $place['name_stop'] }}
+                                                        від: {{ $places[$i]['start'] }} до: {{ $places[$i]['name_stop'] }}
                                                     </div>
                                                     <div class="col-xl-1 col-md-3 col-sm-6 border-right text-center p-0">
-                                                         {{ $place['ticket_id'] }}
+                                                         {{ $places[$i]['ticket_id'] }}
                                                     </div>
                                                     <div class="col-xl-1 col-md-5 col-sm-6 border-right text-center">
-                                                        {{ $place['sum'] }}
+                                                        {{ $places[$i]['sum'] }}
                                                     </div>
                                                     <div class="col-xl-1 col-md-4 col-sm-6 text-center">
-                                                        місце: {{ $place['number_place'] }}
+                                                        місце: {{ $places[$i]['number_place'] }}
                                                     </div>
                                                 </div>
-                                                @if($place['name_benefit'])
+                                                @if($places[$i]['name_benefit'])
                                                     <div class="row">
                                                         <div class="col-12 text-center text-sm-left">
-                                                            {{ $place['name_benefit'] }} / {{ $place['num_certificate'] }} / {{ $place['name_passenger'] }}
+                                                            {{ $places[$i]['name_benefit'] }} / {{ $places[$i]['num_certificate'] }} / {{ $places[$i]['name_passenger'] }}
                                                         </div>
                                                     </div>
                                                 @endif
@@ -227,20 +228,22 @@
 
                                             <!-- /.card-body -->
                                         </div>
-                                    @empty
-
-                                    @endforelse
+                                        @php $counter ++; @endphp
+                                    @endfor
                                 </div>
                             </div>
                             @if(count($places))
                             <div class="row justify-content-between">
                                 <div class="col-3">
-                                    <a class="btn btn-app m-0 disabled" href="{{ route('places.index') }}">
+                                    <a class="btn btn-app m-0 @if(!$paginateLinks['prev']) disabled @endif" @isset($paginateLinks['prev']) href="{{ $paginateLinks['prev'] }}" @endisset>
                                         <i class="fas fa-angle-double-left"></i> Попередній
                                     </a>
                                 </div>
+                                <div class="col-6 text-center p-3">
+                                        Сторінка <b>{{ $paginateLinks['currentPage'] }}</b> з <b>{{ $paginateLinks['lastPage'] }}</b>
+                                </div>
                                 <div class="col-3 text-right">
-                                    <a class="btn btn-app">
+                                    <a class="btn btn-app @if(!$paginateLinks['next']) disabled @endif" @isset($paginateLinks['next']) href="{{ $paginateLinks['next'] }}" @endisset>
                                         <i class="fas fa-angle-double-right"></i> Наступний
                                     </a>
                                 </div>
