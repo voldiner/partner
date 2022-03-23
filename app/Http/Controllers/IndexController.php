@@ -2,16 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\IndexRepository;
 use Illuminate\Http\Request;
 
 class IndexController extends Controller
 {
-    public function index()
+    public function index( IndexRepository $indexRepository)
     {
-        $user = auth()->user();
-        if (!$user){
-            return redirect()->route('welcome');
-        }
-        return view('dashboard', compact('user'));
+        $reports = $indexRepository->getLastReports();
+        $places = $indexRepository->getLastPlaces();
+
+
+
+
+
+        return view('dashboard', compact(
+            'reports'
+
+        ));
     }
 }

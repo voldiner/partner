@@ -20,8 +20,8 @@ class PlaceController extends Controller
         //dd($places);
         $paginateLinks = $placeRepository->paginate($request);
         $placeRepository->createMessage($places);
-        dump($paginateLinks);
-        dump(count($places));
+        //dump($paginateLinks);
+        //dump(count($places));
         //dump($request->getQueryString());
         $stationsSelected = $placeRepository->stationsSelected;
         $dateStart = $placeRepository->dateStart;

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +43,9 @@ Route::middleware(['auth:web', 'verifiedEmail'])->group(function (){
     Route::get('invoices/{id}', [\App\Http\Controllers\InvoiceController::class, 'createInvoicePdf'])->name('invoices.show');
     // --- places
     Route::get('places', [\App\Http\Controllers\PlaceController::class, 'index'])->name('places.index');
+
+//    Route::any('/logout', [AuthenticatedSessionController::class, 'destroy'])
+//        ->name('logout');
 });
 
 
