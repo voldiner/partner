@@ -97,13 +97,14 @@ class ReportRepository
                 continue;
             }
             // ----- визначим додавати нову відомість чи коректувати стару ------- //
-            // todo добавити умову по автостанції
+            // todo добавити умову по автостанції (добавив перевірити як працює)
             $report = Report::where([
                 ['kod_flight', '=', $record->get('kr')],
                 ['time_flight', '=', $record->get('vr')],
                 ['day', '=', $record->get('day')],
                 ['month', '=', $record->get('month')],
                 ['year', '=', $record->get('year')],
+                ['kod_ac', '=', $record->get('kod_ac')]
             ])->first();
 
             if ($report) {
@@ -417,5 +418,14 @@ class ReportRepository
         $this->countedStops = $places->countBy('name_stop');
 
         return $places;
+    }
+
+    public function statistic()
+    {
+        $statisticRepository = new StatisticRepository();
+
+        $result = $statisticRepository->countStatistic();
+
+        return $result;
     }
 }

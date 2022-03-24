@@ -376,7 +376,7 @@ class InvoiceRepository
                 $this->year = $request->get('year');
                 $conditionsAnd[] = ['year', '=', $request->get('year')];
             }
-            //  todo не забути повернути фильтр по перевізнику
+
             $conditionsAnd[] = ['user_id', '=', auth()->user()->id];
             $query->where($conditionsAnd);
             // ----------- OR statement ------------------------- //
@@ -403,7 +403,7 @@ class InvoiceRepository
             } else {
                 $query = Invoice::query();
             }
-            //  todo не забути повернути фильтр по перевізнику
+
             $query->where('user_id', '=', auth()->user()->id);
         }
 

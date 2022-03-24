@@ -98,13 +98,16 @@ class ReportController extends Controller
 
             $notificationRepository->createReportsNotification($reportRepository->warnings, $message);
 
-            $reportRepository->moveToArchive(
+            /*$reportRepository->moveToArchive(
                 $nameReportfile,
                 $namePlacesfile,
                 $request->get('fileReports'),
                 $request->get('filePlaces'),
                 $loggingRepository
-            );
+            );*/
+
+            $reportRepository->statistic();
+
             return response()->json($toResponce, 200);
 
         } catch (\Exception $e) {

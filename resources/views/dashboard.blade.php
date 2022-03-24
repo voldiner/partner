@@ -85,7 +85,7 @@
                                 <span class="info-box-icon bg-info elevation-1"><i class="fas fa-calendar-alt"></i></span>
                                 <div class="info-box-content">
                                     <p class="mb-0">Інформація з відомостей станом на</p>
-                                    <span class="info-box-number">10.03.2022</span>
+                                    <span class="info-box-number">@if(isset($statistic['dateInfo'])) {{ $statistic['dateInfo'] }} @else Не визначено @endif</span>
                                 </div>
                                 <!-- /.info-box-content -->
                             </div>
@@ -97,7 +97,7 @@
                                 <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-file-invoice-dollar"></i></span>
                                 <div class="info-box-content">
                                     <p class="mb-0">Всього завантажено відомостей</p>
-                                    <span class="info-box-number">41,410</span>
+                                    <span class="info-box-number">@if(isset($statistic['numberReportsAll'])) {{ $statistic['numberReportsAll'] }} @else Не визначено @endif</span>
                                 </div>
                                 <!-- /.info-box-content -->
                             </div>
@@ -113,7 +113,7 @@
                                 <span class="info-box-icon bg-success elevation-1"><i class="fas fa-bus"></i></span>
                                 <div class="info-box-content">
                                     <p class="mb-0">Інформація про квитки</p>
-                                    <span class="info-box-number">760</span>
+                                    <span class="info-box-number">@if(isset($statistic['numberPlacesAll'])) {{ $statistic['numberPlacesAll'] }} @else Не визначено @endif</span>
                                 </div>
                                 <!-- /.info-box-content -->
                             </div>
@@ -126,7 +126,7 @@
 
                                 <div class="info-box-content">
                                     <p class="mb-0">Інформація про пільгові квитки</p>
-                                    <span class="info-box-number">2,000</span>
+                                    <span class="info-box-number">@if(isset($statistic['numberPlacesBenefit'])) {{ $statistic['numberPlacesBenefit'] }} @else Не визначено @endif</span>
                                 </div>
                                 <!-- /.info-box-content -->
                             </div>

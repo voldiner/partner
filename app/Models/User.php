@@ -51,6 +51,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $date_contract дата договора
  * @property string|null $telephone телефон
  * @property string|null $edrpou код едрпоу
+ * @property string|null $statistic  json статистика
  *
  */
 class User extends Authenticatable
@@ -116,6 +117,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'statistic' => 'array'
     ];
 
     public function invoices()

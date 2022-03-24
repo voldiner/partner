@@ -10,14 +10,11 @@ class IndexController extends Controller
     public function index( IndexRepository $indexRepository)
     {
         $reports = $indexRepository->getLastReports();
-        $places = $indexRepository->getLastPlaces();
-
-
-
-
+        $statistic = $indexRepository->getStatistic();
 
         return view('dashboard', compact(
-            'reports'
+            'reports',
+            'statistic'
 
         ));
     }

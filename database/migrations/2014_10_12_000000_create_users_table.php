@@ -45,6 +45,7 @@ class CreateUsersTable extends Migration
             $table->date('date_contract')->nullable()->comment('дата договора');
             $table->string('telephone')->nullable()->comment('телефон');
             $table->string('edrpou')->nullable()->comment('код едрпоу');
+            $table->text('statistic')->nullable()->comment('json statistic');
 
         });
     }
