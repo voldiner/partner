@@ -44,10 +44,11 @@ class StatisticRepository
     /**
      * обрахунок статистичної інформації по перевізнику
      * @param int $id
-     * @return array
+     * @return string
      */
     public function countStatistic()
     {
+        $timeStart = time();
         User::query()
             ->select(['id', 'user_type', 'statistic'])
             ->where('user_type', '=', 1)
@@ -58,6 +59,10 @@ class StatisticRepository
                     $user->save();
                 }
             });
+        $timeWork = time() - $timeStart;
+        $message = "Statistic count success. Time work {$timeWork} sec.";
+        return $message;
+
     }
 
     private function countStatistibById($id)

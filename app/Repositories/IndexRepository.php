@@ -17,9 +17,8 @@ class IndexRepository
     public $last_reports_to_view, $last_places_to_view;
     public function __construct()
     {
-        // todo винести в файл налаштувань
-        $this->last_reports_to_view = 10;
-        $this->last_places_to_view = 10;
+        $this->last_reports_to_view = config('partner.reports_to_view_home', 10);
+        $this->last_places_to_view = config('partner.places_to_view_home', 10);
 
     }
 

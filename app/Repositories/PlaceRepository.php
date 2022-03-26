@@ -129,8 +129,8 @@ class PlaceRepository
 
                 }
             });
-            // todo винести в файл налаштувань
-            Cache::put($key, $this->result, 60 * 60 );
+
+            Cache::put($key, $this->result, config('partner.time_cache', 3600) );
         }
 
 

@@ -93,10 +93,10 @@ class ReportController extends Controller
 
             $loggingRepository->createReportsLoggingMessage($message);
             $loggingRepository->createReportsLoggingMessages($reportRepository->warnings);
+            $messageStat = $reportRepository->statistic();
+            $toResponce = $reportRepository->createDataResponce($message . $messageStat, $reportRepository->warnings);
 
-            $toResponce = $reportRepository->createDataResponce($message, $reportRepository->warnings);
-
-            $notificationRepository->createReportsNotification($reportRepository->warnings, $message);
+            $notificationRepository->createReportsNotification($reportRepository->warnings, $message . $messageStat);
 
             /*$reportRepository->moveToArchive(
                 $nameReportfile,
@@ -106,7 +106,7 @@ class ReportController extends Controller
                 $loggingRepository
             );*/
 
-            $reportRepository->statistic();
+
 
             return response()->json($toResponce, 200);
 
