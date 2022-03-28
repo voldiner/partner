@@ -9,6 +9,14 @@ class IndexController extends Controller
 {
     public function index()
     {
-        dd(__METHOD__);
+
+        //$reports = $indexRepository->getLastReports();
+        //$statistic = $indexRepository->getStatistic();
+
+        return view('admin.dashboard'
+
+
+
+        );
     }
 }
