@@ -1,4 +1,4 @@
-@extends('layouts.layout')
+@extends('admin.layouts.layout')
 @section('title', 'Акти виконаних робіт')
 @section('body_classes','hold-transition sidebar-mini')
 @section('my_styles')
@@ -16,8 +16,8 @@
 @section('content')
     <!-- Site wrapper -->
     <div class="wrapper">
-    @include('partials.navbar')
-    @include('partials.sidebar')
+    @include('admin.partials.navbar')
+    @include('admin.partials.sidebar')
     <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
             <!-- Content Header (Page header) -->
@@ -57,7 +57,7 @@
                                 </div>
                                 <!-- /.card-header -->
                                 <div class="card-body" style="display: block;">
-                                    <form action="{{ route('invoices.index') }}" method="get">
+                                    <form action="{{ route('manager.invoices.index') }}" method="get">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <!-- multiple -->
@@ -109,7 +109,7 @@
                                 <div class="card card-gray rounded-pill">
                                     <div class="card-header rounded-pill">
                                         <p class="card-title">
-                                            <a class="btn btn-danger btn-sm" href="{{ route('invoices.index') }}">
+                                            <a class="btn btn-danger btn-sm" href="{{ route('manager.invoices.index') }}">
                                                 <i class="fas fa-trash">
                                                 </i>
                                                 Скасувати
@@ -327,7 +327,7 @@
                                                         Підпис ______________ {{ $invoice->user->surname }}
                                                     </p>
                                                     <p>
-                                                        <a class="btn btn-success" id="pdf-list" href="{{ route('invoices.show', $invoice->id) }}">
+                                                        <a class="btn btn-success" id="pdf-list" href="{{ route('manager.invoices.show', $invoice->id) }}">
                                                             <i class="fas fa-download">
                                                             </i>
                                                             Друк PDF
