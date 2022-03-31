@@ -100,14 +100,14 @@ class UserController extends Controller
                 }
                 $user = new User();
 
-                $user->name = $record->get('nazva');
+                $user->name = str_replace(['i','I'], ['і', 'І'], $record->get('nazva'));
 
                 $user->user_type = 1 ;  // перевізник
                 $user->is_active = true;
                 $user->password_fxp = Str::random(20);
                 $user->kod_fxp = $record->get('kod');
-                $user->full_name = $record->get('nazva');
-                $user->short_name = $record->get('nazva_k');
+                $user->full_name = str_replace(['i','I'], ['і', 'І'], $record->get('nazva'));
+                $user->short_name = str_replace(['i','I'], ['і', 'І'], $record->get('nazva_k'));
                 $user->percent_retention_tariff = $record->get('proc');
                 $user->percent_retention__insurance = $record->get('procself');
                 $user->percent_retention__insurer = $record->get('procgarn');

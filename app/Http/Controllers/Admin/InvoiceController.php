@@ -16,7 +16,7 @@ class InvoiceController extends Controller
     {
 
         $invoices = $invoiceRepository->getInvoicesFromQuery($request);
-        //dd($invoices->first()->products);
+
         $countInvoices = $invoiceRepository->countInvoices;
         $monthsFromSelect = $invoiceRepository->monthsFromSelect;
         $monthsSelected = $invoiceRepository->monthsSelected;

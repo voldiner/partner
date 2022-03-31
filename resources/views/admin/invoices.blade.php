@@ -157,6 +157,9 @@
                                             <div class="col-auto">
                                                  {{ number_format($invoice->sum_for_transfer, 2, '.', ' ') }}
                                             </div>
+                                            <div class="col-auto">
+                                                {{ $invoice->user->full_name }}
+                                            </div>
                                             <div class="card-tools col text-right">
                                                 {{--<span class="badge badge-warning" style="font-size: 100%;">{{ $report->places_count }}</span>--}}
                                                 <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i>
