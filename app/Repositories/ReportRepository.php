@@ -64,6 +64,7 @@ class ReportRepository
         //throw new \Exception('Testing exception!!!');
         $countReportsAdd = 0;
         $countReportsUpdate = 0;
+        $countReportsDelete = 0;
         $countReportsAll = 0;
         $startTime = time();
 
@@ -98,7 +99,7 @@ class ReportRepository
             }
             // ----- визначим додавати нову відомість чи коректувати стару ------- //
             // todo добавити умову по автостанції (добавив перевірити як працює) якщо відомість видалена на АС
-            // todo то як при синхронізації це відобразхити
+            // todo то як при синхронізації це відобразити - ЗРОБИВ ТЕЖ
             $report = Report::where([
                 ['kod_flight', '=', $record->get('kr')],
                 ['time_flight', '=', $record->get('vr')],
@@ -109,12 +110,26 @@ class ReportRepository
             ])->first();
 
             if ($report) {
-                // видалити  places ,оновити report
-                $report->places()->delete();
-                $countReportsUpdate++;
+                if ($record->get('suma') < 0){
+                    // видалити places, видалити report
+                    $report->places()->delete();
+                    $report->delete();
+                    $countReportsDelete++;
+                    continue;
+                }else{
+                    // видалити  places ,оновити report
+                    $report->places()->delete();
+                    $countReportsUpdate++;
+                }
             } else {
-                $report = new Report();
-                $countReportsAdd++;
+                // --відомість якиа був вилучена, шгноруємо
+                if ($record->get('suma') < 0){
+                    $countReportsDelete++;
+                    continue;
+                }else{
+                    $report = new Report();
+                    $countReportsAdd++;
+                }
             }
 
             $this->fillReport($report, $record, $station, $user_id);
@@ -124,7 +139,7 @@ class ReportRepository
             $report->places()->saveMany($places);
         }
         $timeWork = time() - $startTime;
-        $result = "Processed {$countReportsAll} record. Add {$countReportsAdd} reports. Update {$countReportsUpdate} reports. Time {$timeWork} sec.";
+        $result = "Processed {$countReportsAll} record. Add {$countReportsAdd} reports. Update {$countReportsUpdate} reports. Delete {$countReportsDelete} reports. Time {$timeWork} sec.";
         return $result;
 
     }

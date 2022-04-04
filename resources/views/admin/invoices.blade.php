@@ -11,6 +11,34 @@
             background-color: rgba(0,0,0,.05);
             font-weight: bold;
         }
+        #ajax{
+            background-color: #fff;
+            background-image: url("{{ asset('dist/img/preloader.gif') }}");
+            background-position: center top;
+            background-repeat: no-repeat;
+            opacity: 0.8;
+            border: 1px solid gray;
+            border-radius: 10px;
+            display: none;
+            left: 50%;
+            top: 50%;
+            padding: 80px 10px 10px;
+            position: fixed;
+            text-align: center;
+            /*width: 200px;*/
+            vertical-align: bottom;
+            z-index: 100;
+        }
+        #ajax span{
+            font-size: 1.3rem;
+            color: green;
+        }
+        .display-alert{
+            display: block;
+        }
+        .no-display-alert{
+            display: none;
+        }
     </style>
 @endsection
 @section('content')
@@ -20,6 +48,8 @@
     @include('admin.partials.sidebar')
     <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
+            <!-- ajax -->
+            <div id="ajax"></div>
             <!-- Content Header (Page header) -->
             <section class="content-header">
                 <div class="container-fluid">
@@ -158,10 +188,15 @@
                                                  {{ number_format($invoice->sum_for_transfer, 2, '.', ' ') }}
                                             </div>
                                             <div class="col-auto">
-                                                {{ $invoice->user->full_name }}
+                                                <b>{{ $invoice->user->full_name }}</b>
                                             </div>
+
                                             <div class="card-tools col text-right">
-                                                {{--<span class="badge badge-warning" style="font-size: 100%;">{{ $report->places_count }}</span>--}}
+                                                 <span class="icheck-primary">
+                                                    <input type="checkbox" value="{{ $invoice->id }}" id="check{{ $loop->iteration }}" class="check-send">
+                                                    <label for="check{{ $loop->iteration }}" class="mt-1"></label>
+                                                 </span>
+                                                <span class="badge badge-warning mt-1" style="font-size: 100%;">1</span>
                                                 <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i>
                                                 </button>
                                             </div>
@@ -363,13 +398,14 @@
                         <div class="col-md-9 mt-2">
                             {{ $invoices->links() }}
                         </div>
-                        {{--<div class="col-md-3 mt-2 text-md-right">--}}
-                            {{--<a class="btn btn-success" id="pdf-list" href="{{ $urlCreatePdfList }}">--}}
-                                {{--<i class="fas fa-download">--}}
-                                {{--</i>--}}
-                                {{--Create PDF--}}
-                            {{--</a>--}}
-                        {{--</div>--}}
+                        <div class="col-md-3 mt-2 text-md-right">
+                            <button type="button" class="btn btn-default btn-sm checkbox-toggle"><i class="far fa-square"></i>
+                            </button>
+                            <a class="btn btn-primary" id="send-invoices" href="#">
+                                <i class="fas fa-download"></i>
+                                Відправити
+                            </a>
+                        </div>
                     </div>
 
                     <!-- /.col -->
@@ -404,10 +440,125 @@
     {{--<script src="{{ asset('dist/js/url.min.js') }}"></script>--}}
     <script>
         jQuery(function ($) {
-
             //Initialize Select2 Elements
             $('.select2').select2();
-            //Date range picker
+
+            //Enable check and uncheck all functionality
+            $('.checkbox-toggle').click(function () {
+                var clicks = $(this).data('clicks');
+                if (clicks) {
+                    //Uncheck all checkboxes
+                    $('.card-tools input[type=\'checkbox\']').prop('checked', false);
+                    $('.checkbox-toggle .far.fa-check-square').removeClass('fa-check-square').addClass('fa-square');
+                } else {
+                    //Check all checkboxes
+                    $('.card-tools input[type=\'checkbox\']').prop('checked', true);
+                    $('.checkbox-toggle .far.fa-square').removeClass('fa-square').addClass('fa-check-square');
+                }
+                $(this).data('clicks', !clicks);
+            });
+
+            // відправка документів на сервіс ВЧАСНО
+            $('#send-invoices').click(function (e) {
+                e.preventDefault();
+                var checkBoxes = $('input:checked');
+                if (checkBoxes.length > 0){
+                    $('#ajax').html('<div class="progress-group"> Відправка документів <b>0/' + checkBoxes.length + '</b><div class="progress progress-sm"><div class="progress-bar bg-primary" style="width: 0%"></div></div></div>').fadeIn(500, function () {
+                        for (var x=0; x < checkBoxes.length; x++){
+                            sleep(1);
+
+
+                        }
+                    });
+                }
+            });
+
+
+            $('#ajax').html('<div class="progress-group"> Відправка документів <b>160/200</b><div class="progress progress-sm"><div class="progress-bar bg-primary" style="width: 30%"></div></div></div>').fadeIn(500, function () {
+
+                var data = {
+                    "category": $('#category').val(),
+                    "data-range": $('#reservation').val(),
+                    "ac-name": $('#mega-ac').val(),
+                    "folder": $('#folder').val(),
+                    "r-input": $('.radioPrimary:checked').data("radio")
+                };
+                //console.log(data);
+                var cookie_value = JSON.stringify(data);
+
+                $.ajax({
+                    url: "{{ route('manager.invoices.send') }}",
+                    type: "POST",
+                    data: data,
+                    dataType: 'json',
+                    success: function (data) {
+                        $('#alert-valid').addClass('no-display-alert');
+                        $.cookie('parameters', cookie_value, {expires: 30});
+                        // ----- будуємо графік ---------------------
+                        var areaChartData = {
+                            labels: data.labels,
+                            datasets: [
+                                {
+                                    label: data.label,
+                                    backgroundColor: data.backgroundColor,
+                                    borderColor: data.borderColor,
+                                    pointRadius: data.pointRadius,
+                                    pointColor: data.pointColor,
+                                    pointStrokeColor: data.pointStrokeColor,
+                                    pointHighlightFill: data.pointHighlightFill,
+                                    pointHighlightStroke: data.pointHighlightStroke,
+                                    data: data.data
+                                },
+                            ]
+                        };
+                        //-------------
+                        //- BAR CHART -
+                        //-------------
+                        var barChartCanvas = $('#barChart').get(0).getContext('2d');
+                        var barChartData = jQuery.extend(true, {}, areaChartData);
+
+                        var barChartOptions = {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            datasetFill: false
+                        };
+
+                        var barChart = new Chart(barChartCanvas, {
+                            type: 'bar',
+                            data: barChartData,
+                            options: barChartOptions
+                        });
+
+                        $('#ajax').find('span').text('Побудовано!');
+                        $('#ajax').delay(300).fadeOut(300);
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        var http_kod = jqXHR.status;
+                        // ---- розшифровуємо тільки помилки що повертає скрипт --- //
+                        var title = 'Невідома помилка -> http kod ' + http_kod;
+                        var content = '';
+                        if (jqXHR.getResponseHeader('megalog') === 'errorMegalog') {
+                            if (typeof $.parseJSON(jqXHR.responseText).error !== 'undefined') {
+                                var title = $.parseJSON(jqXHR.responseText).error + ' http kod ' + http_kod;
+                            }
+                            if (typeof $.parseJSON(jqXHR.responseText).message !== 'undefined') {
+                                let massages = $.parseJSON(jqXHR.responseText).message;
+                                for (let i = 0; i < massages.length; i++) {
+                                    content += massages[i] + '<br>';
+                                }
+                            }
+                        }
+                        $('#ajax').find('span').text('Помилка!');
+                        $('#ajax').delay(300).fadeOut(300);
+                        $('#alert-valid p').html(content);
+                        $('#alert-valid h5 span').html(title);
+                        $('#alert-valid').removeClass('no-display-alert');
+                    }
+                })
+            });
+
+
+
 
         })
     </script>

@@ -35,8 +35,8 @@ class CreateInvoicesTable extends Migration
             $table->decimal('pdv',12,2)->nullable()->comment('сума в т.ч. ПДВ');
             $table->decimal('sum_for_tax',12,2)->nullable()->comment('сума до оподаткування');
             $table->foreignId('user_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-
-            $table->softDeletes();
+            $table->integer('counter_sending')->default(0)->comment('кількість відправок контрагенту через сервіс Вчасно');
+            //$table->softDeletes();
             $table->timestamps();
         });
     }

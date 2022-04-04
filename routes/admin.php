@@ -22,8 +22,10 @@ Route::middleware('auth:admin')->group(function (){
     Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
     // -- invoices
     Route::get('invoices', [\App\Http\Controllers\Admin\InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('invoices/send', [\App\Http\Controllers\Admin\InvoiceController::class, 'sendInvoiceToPartner'])->name('invoices.send');
     Route::get('invoices/{id}', [\App\Http\Controllers\Admin\InvoiceController::class, 'createInvoicePdf'])->name('invoices.show');
     Route::post('/', [\App\Http\Controllers\Admin\IndexController::class, 'setCarrier'])->name('set_carrier');
+
     // ---  reports
     Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/createList', [\App\Http\Controllers\Admin\ReportController::class, 'createReportsList'])->name('reports.createList');
