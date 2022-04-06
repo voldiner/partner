@@ -43,6 +43,12 @@
         .no-display-alert {
             display: none;
         }
+        #send-messages{
+            height: 200px;
+            overflow: auto;
+            background-color: #0c5460;
+            border-radius: 5px;
+        }
     </style>
 @endsection
 @section('content')
@@ -205,13 +211,15 @@
                                                 <b>{{ $invoice->user->full_name }}</b>
                                             </div>
 
-                                            <div class="card-tools col text-right">
+                                            <div class="card-tools col text-right" id="divcounter{{  $invoice->id  }}">
+                                                @if($invoice->counter_sending > 0)
+                                                    <span class="badge badge-warning mt-1 mr-3" id="counter{{ $invoice->id }}" style="font-size: 100%;">{{ $invoice->counter_sending }}</span>
+                                                @endif
                                                  <span class="icheck-primary">
                                                     <input type="checkbox" value="{{ $invoice->id }}"
                                                            id="check{{ $loop->iteration }}" class="check-send">
                                                     <label for="check{{ $loop->iteration }}" class="mt-1"></label>
                                                  </span>
-                                                <span class="badge badge-warning mt-1" style="font-size: 100%;">1</span>
                                                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                                     <i class="fas fa-plus"></i>
                                                 </button>
@@ -438,7 +446,17 @@
                             </a>
                         </div>
                     </div>
+                    <div class="row">
+                        <div  class="col-12 alert alert-info alert-dismissible no-display-alert" id="log-message">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <h5><i class="icon fas fa-info"></i> Інформація про відправку актів на сервіс "Вчасно"</h5>
+                            <div id="send-messages">
+                                <ul>
 
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     <!-- /.col -->
                 {{--</div>--}}
                 <!-- /.row -->
@@ -496,6 +514,10 @@
                 var progress;
                 if (checkBoxes.length > 0) {
                     $('#ajax').html('<div class="progress-group"> <span>Відправка документів</span> <b>0/' + checkBoxes.length + '</b><div class="progress progress-sm"><div class="progress-bar bg-primary" style="width: 0%"></div></div></div>').fadeIn(500, function () {
+                        $('#log-message').removeClass('no-display-alert');
+                        $('#log-message').addClass('display-alert');
+
+                        $('#send-messages ul').append('<li> ----- Початок передачі ---- </li>');
                         for (var x = 0; x < checkBoxes.length; x++) {
 
                             //console.log()
@@ -504,6 +526,7 @@
                             $('#ajax').html('<div class="progress-group"> Відправка документів <b>' + (x + 1) + '/' + checkBoxes.length + '</b><div class="progress progress-sm"><div class="progress-bar bg-primary" style="width: ' + progress + '%"></div></div></div>')
 
                         }
+                        $('#send-messages ul').append('<li> ----- Кінець передачі ---- </li>');
                     });
                     $('#ajax').find('span').text('Відправлено!');
                     $('#ajax').delay(300).fadeOut(300);
@@ -526,7 +549,14 @@
                        // $('#alert-valid').addClass('no-display-alert');
 
                         console.log(data);
-
+                        $('#send-messages ul').append('<li>'+ data.message + '</li>');
+                        // --- успішне завершення передачі ----- //
+                        if (typeof data.success !== "undefined"){
+                            let idElement = '#divcounter' + data.id;
+                            let idSpan = '#counter' + data.id;
+                            $(idSpan).remove();
+                            $(idElement).prepend(' <span class="badge badge-warning mt-1 mr-3" id="counter' + data.id + '" style="font-size: 100%;">' + data.counter + '</span>');
+                        }
 
                     },
                     error: function (jqXHR, textStatus, errorThrown) {

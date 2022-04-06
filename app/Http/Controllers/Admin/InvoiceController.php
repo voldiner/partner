@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\InvoicesSearchRequest;
 use App\Models\Invoice;
+use Carbon\Carbon;
 use Exception;
 use App\Http\Controllers\Controller as Controller;
 use App\Repositories\Admin\InvoiceRepository;
@@ -68,9 +69,10 @@ class InvoiceController extends Controller
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer',
         ]);
-
+        $dateToMessage = Carbon::now()->format('d-m-Y G:i:s');
+        $textError = '<span style="color: red;"> Помилка! </span>';
         if ($validator->fails()) {
-            return response()->json(['error' => true, 'message' => 'Error Invoice id from request'], 400);
+            return response()->json(['error' => true, 'message' =>  "{$dateToMessage} {$textError} Error Invoice id from request"], 200);
         }
 
         $id = $request->get('id');
@@ -78,15 +80,12 @@ class InvoiceController extends Controller
 
             $invoice = Invoice::where('id', $id)->with(['products', 'retentions'])->first();
             if (!$invoice) {
-                //$request->session()->flash('error', "Invoice id={$id} not found");
-                return response()->json(['error' => true, 'message' => "Invoice id={$id} not found"], 404);
+                return response()->json(['error' => true, $dateToMessage . 'message' => $dateToMessage . "{$textError} Invoice id={$id} not found"], 200);
             }
             $monthsFromSelect = $invoiceRepository->monthsFromSelect;
             // ----- name file
             if (is_null($invoice->user->email_verified_at)) {
-                //$request->session()->flash('error', "Invoice id={$id} not found");
-                return response()->json(['error' => true, 'message' => "Користувач {$invoice->user->short_name } не має підтвердженого email"], 406);
-
+                return response()->json(['error' => true, 'message' => "{$dateToMessage} {$textError} Користувач {$invoice->user->short_name } не має підтвердженого email"], 200);
             }
             $email = $invoice->user->email;
             $kod = null;
@@ -98,7 +97,7 @@ class InvoiceController extends Controller
                 }
             }
             if (is_null($kod)){
-                return response()->json(['error' => true, 'message' => "Користувач {$invoice->user->short_name } не має підтвердженого email"], 406);
+                return response()->json(['error' => true, 'message' => "{$dateToMessage} {$textError} Користувач {$invoice->user->short_name } не має ані коду ЄДРПОУ, ні коду ІПН"], 200);
             }
             $date = $invoice->date_invoice->format('Ymd');
             $num = $invoice->number;
@@ -111,13 +110,9 @@ class InvoiceController extends Controller
                 'monthsFromSelect'
             ))->save($nameFile);
         } catch (Exception $exception) {
-            return response()->json(['error' => true, 'message' => $exception->getMessage()], 503);
+            return response()->json(['error' => true, 'message' => $dateToMessage . ' ' . $textError . $exception->getMessage()], 200);
         }
 
-
-        //$nameFile = storage_path('app\send\03113130_3481008043_20220403_АктЗвірки_8702.pdf');
-        //$nameFile = storage_path("app\send\\12АктЗвірки_8702-{$id}.pdf");
-        //return response()->json(['name' => $nameFile], 200);
         //dd(Storage::exists($nameFile));
         //dd($nameFile);
 //        $response = Http::withHeaders([
@@ -128,9 +123,13 @@ class InvoiceController extends Controller
 //
 //        dd($response->json());
         // ------- проставити відмітку counter_sending
-
+        $invoice->counter_sending++;
+        $invoice->save();
         // ----------------------------------------------
-        $result['success'] = $id;
+        $result['success'] = true;
+        $result['id'] = $id;
+        $result['message'] = $dateToMessage . '  Акт №' . $invoice->number . ' перевізник ' . $invoice->user->short_name . 'успішно передано в ВЧАСНО';
+        $result['counter'] = $invoice->counter_sending;
         return response()->json($result, 200);
     }
 }
