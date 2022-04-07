@@ -21,12 +21,12 @@
             border: 1px solid gray;
             border-radius: 10px;
             display: none;
-            left: 50%;
+            left: 35%;
             top: 50%;
             padding: 80px 10px 10px;
             position: fixed;
             text-align: center;
-            /*width: 200px;*/
+            width: 40%;
             vertical-align: bottom;
             z-index: 100;
         }
@@ -41,12 +41,12 @@
         }
 
         .no-display-alert {
-            display: none;
+            display: none !important;
         }
         #send-messages{
             height: 200px;
             overflow: auto;
-            background-color: #0c5460;
+            /*background-color: #0c5460;*/
             border-radius: 5px;
         }
     </style>
@@ -433,10 +433,10 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-9 mt-2">
+                        <div class="col-md-9 col-sm-8 mt-2">
                             {{ $invoices->links() }}
                         </div>
-                        <div class="col-md-3 mt-2 text-md-right">
+                        <div class="col-md-3 col-sm-4 mt-2 text-sm-right">
                             <button type="button" class="btn btn-default btn-sm checkbox-toggle"><i
                                         class="far fa-square"></i>
                             </button>
@@ -447,14 +447,21 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div  class="col-12 alert alert-info alert-dismissible no-display-alert" id="log-message">
-                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                            <h5><i class="icon fas fa-info"></i> Інформація про відправку актів на сервіс "Вчасно"</h5>
-                            <div id="send-messages">
+                        <div class="card card-gray col-12 p-0 no-display-alert" id="log-message">
+                            <div class="card-header">
+                                <h5 class="card-title"><i class="icon fas fa-info"></i>Інформація про відправку актів на сервіс "Вчасно"</h5>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                                    </button>
+                                </div>
+                                <!-- /.card-tools -->
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="card-body" id="send-messages">
                                 <ul>
-
                                 </ul>
                             </div>
+                            <!-- /.card-body -->
                         </div>
                     </div>
                     <!-- /.col -->
@@ -513,9 +520,8 @@
                 var checkBoxes = $('input:checked');
                 var progress;
                 if (checkBoxes.length > 0) {
-                    $('#ajax').html('<div class="progress-group"> <span>Відправка документів</span> <b>0/' + checkBoxes.length + '</b><div class="progress progress-sm"><div class="progress-bar bg-primary" style="width: 0%"></div></div></div>').fadeIn(500, function () {
+                    $('#ajax').html('<div class="progress-group"> <span>Відправка документів </span><b> 0/' + checkBoxes.length + '</b><div class="progress progress-sm"><div class="progress-bar bg-primary" style="width: 0%"></div></div></div>').fadeIn(500, function () {
                         $('#log-message').removeClass('no-display-alert');
-                        $('#log-message').addClass('display-alert');
 
                         $('#send-messages ul').append('<li> ----- Початок передачі ---- </li>');
                         for (var x = 0; x < checkBoxes.length; x++) {
@@ -523,13 +529,22 @@
                             //console.log()
                             sendRequest(checkBoxes[x].value);
                             var progress = 100 * ((x + 1) / checkBoxes.length);
-                            $('#ajax').html('<div class="progress-group"> Відправка документів <b>' + (x + 1) + '/' + checkBoxes.length + '</b><div class="progress progress-sm"><div class="progress-bar bg-primary" style="width: ' + progress + '%"></div></div></div>')
+                            $('#ajax').html('<div class="progress-group"><span>Відправка документів </span><b> ' + (x + 1) + '/' + checkBoxes.length + '</b><div class="progress progress-sm"><div class="progress-bar bg-primary" style="width: ' + progress + '%"></div></div></div>')
 
                         }
                         $('#send-messages ul').append('<li> ----- Кінець передачі ---- </li>');
+                        $('#ajax').find('span').text('Відправлено!');
+                        $('#ajax').append('<a class="btn btn-primary" id="send-ok" href="#"><i class="fas fa-check"></i> Ok </a>');
+                        // ---- закриття прелаодера -------
+                        $('#send-ok').click(function (e) {
+                            e.preventDefault();
+                            $('#ajax').fadeOut(200);
+                        });
+
+                        //$('#ajax').delay(300).fadeOut(300);
+
                     });
-                    $('#ajax').find('span').text('Відправлено!');
-                    $('#ajax').delay(300).fadeOut(300);
+
                 }
             });
 

@@ -70,32 +70,27 @@ class InvoiceController extends Controller
             'id' => 'required|integer',
         ]);
         $dateToMessage = Carbon::now()->format('d-m-Y G:i:s');
-        $textError = '<span style="color: red;"> Помилка! </span>';
+        $textError = '<span style="color: red; background-color: yellow"> Помилка! </span>';
         if ($validator->fails()) {
             return response()->json(['error' => true, 'message' =>  "{$dateToMessage} {$textError} Error Invoice id from request"], 200);
         }
 
         $id = $request->get('id');
         try {
+            $invoice = $invoiceRepository->getInvoiceById($id);
 
-            $invoice = Invoice::where('id', $id)->with(['products', 'retentions'])->first();
             if (!$invoice) {
                 return response()->json(['error' => true, $dateToMessage . 'message' => $dateToMessage . "{$textError} Invoice id={$id} not found"], 200);
             }
             $monthsFromSelect = $invoiceRepository->monthsFromSelect;
-            // ----- name file
+
             if (is_null($invoice->user->email_verified_at)) {
                 return response()->json(['error' => true, 'message' => "{$dateToMessage} {$textError} Користувач {$invoice->user->short_name } не має підтвердженого email"], 200);
             }
             $email = $invoice->user->email;
-            $kod = null;
-            if (!empty($invoice->user->edrpou)){
-                $kod = $invoice->user->edrpou;
-            }else{
-                if (!empty($invoice->user->identifier)){
-                    $kod = $invoice->user->identifier;
-                }
-            }
+
+           $kod = $invoiceRepository->getUserCode($invoice->user->edrpou, $invoice->user->identifier);
+
             if (is_null($kod)){
                 return response()->json(['error' => true, 'message' => "{$dateToMessage} {$textError} Користувач {$invoice->user->short_name } не має ані коду ЄДРПОУ, ні коду ІПН"], 200);
             }
@@ -109,26 +104,24 @@ class InvoiceController extends Controller
                 'invoice',
                 'monthsFromSelect'
             ))->save($nameFile);
+
+             $transfer = $invoiceRepository->sendPdfToPartner($nameFile);
+
+             if (!$transfer['result']){
+                 return response()->json(['error' => true, 'message' => "{$dateToMessage} {$textError} Акт № {$invoice->number} перевізника {$invoice->user->short_name } помилка передачі на сервіс ВЧАСНО ({$transfer['message']})" ], 200);
+             }
+
+
         } catch (Exception $exception) {
             return response()->json(['error' => true, 'message' => $dateToMessage . ' ' . $textError . $exception->getMessage()], 200);
         }
 
-        //dd(Storage::exists($nameFile));
-        //dd($nameFile);
-//        $response = Http::withHeaders([
-//            'Authorization' => 'Wty3MUVfRj0Q0M43kyKWlB-gOKjSW13924xp',
-//        ])
-//            ->attach('file', file_get_contents($nameFile), '03113130_3481008043_20220403_АктЗвірки_8702-025_voldiner@ukr.net.pdf')
-//            ->post('https://vchasno.ua/api/v2/documents');
-//
-//        dd($response->json());
-        // ------- проставити відмітку counter_sending
         $invoice->counter_sending++;
         $invoice->save();
-        // ----------------------------------------------
+
         $result['success'] = true;
         $result['id'] = $id;
-        $result['message'] = $dateToMessage . '  Акт №' . $invoice->number . ' перевізник ' . $invoice->user->short_name . 'успішно передано в ВЧАСНО';
+        $result['message'] = $dateToMessage . '  Акт №' . $invoice->number . ' перевізник ' . $invoice->user->short_name . 'успішно передано в ВЧАСНО (id = ' . $transfer['message'] . ')';
         $result['counter'] = $invoice->counter_sending;
         return response()->json($result, 200);
     }

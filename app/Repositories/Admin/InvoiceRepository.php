@@ -13,6 +13,7 @@ use App\Http\Requests\InvoicesSearchRequest;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Retention;
+use Illuminate\Support\Facades\Http;
 use XBase\TableReader;
 use App\Models\Station;
 use App\Models\User;
@@ -120,5 +121,48 @@ class InvoiceRepository extends Repository
             ->pluck('id','short_name');
         $users->prepend(0,'не вказано' );
         return $users;
+    }
+
+    public function getInvoiceById($id)
+    {
+        $invoice = Invoice::where('id', $id)->with(['products', 'retentions'])->first();
+        return $invoice;
+    }
+
+    public function getUserCode($edrpou, $identifier)
+    {
+        $kod = null;
+        if (!empty($edrpou)){
+            $kod = $edrpou;
+        }else{
+            if (!empty($identifier)){
+                $kod = $identifier;
+            }
+        }
+        return $kod;
+    }
+
+    public function sendPdfToPartner($nameFile)
+    {
+        if (!file_exists($nameFile)){
+            $result = ['result' => false , 'message' => 'Відсутній файл' . $nameFile];
+            return $result;
+        }
+
+        $response = Http::withHeaders([
+            'Authorization' => env('TOKEN_VCHASNO'),
+        ])
+            ->attach('file', file_get_contents($nameFile), $nameFile)
+            ->post('https://vchasno.ua/api/v2/documents');
+
+        if ($response->status() === 201){
+            $message = 'Успішна передача ' . isset($response->json()['documents'][0]['id']) ? $response->json()['documents'][0]['id'] :  'no ID';
+            $result = ['result' => true , 'message' => $message];
+            return $result;
+        }else{
+            $message = isset($response->json()['reason']) ? $response->json()['reason'] : ' без причини.';
+            $result = ['result' => false , 'message' => $message];
+            return $result;
+        }
     }
 }
