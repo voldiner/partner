@@ -32,14 +32,14 @@
                     <a href="{{ route('manager.index') }}" class="nav-link @if(Route::currentRouteName()== 'manager.index') active @endif">
                         <i class="nav-icon far fa-address-card"></i>
                         <p>
-                            Домашня
+                            Перевізники
                             {{--<span class="right badge badge-danger">New</span>--}}
                         </p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('manager.reports.index') }}" class="nav-link @if(Route::currentRouteName()== 'manager.reports.index') active @endif">
-                        <i class="nav-icon far fa-address-card"></i>
+                        <i class="nav-icon fas fa-file-alt"></i>
                         <p>
                             Відомості
                             {{--<span class="right badge badge-danger">New</span>--}}
@@ -48,7 +48,7 @@
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('manager.invoices.index') }}" class="nav-link @if(Route::currentRouteName()== 'manager.invoices.index') active @endif">
-                        <i class="nav-icon far fa-address-card"></i>
+                        <i class="nav-icon fas fa-people-arrows"></i>
                         <p>
                             Акти виконаних робіт
                             {{--<span class="right badge badge-danger">New</span>--}}

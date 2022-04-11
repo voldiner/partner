@@ -449,7 +449,7 @@
                     <div class="row">
                         <div class="card card-gray col-12 p-0 no-display-alert" id="log-message">
                             <div class="card-header">
-                                <h5 class="card-title"><i class="icon fas fa-info"></i>Інформація про відправку актів на сервіс "Вчасно"</h5>
+                                <h5 class="card-title"><i class="icon fas fa-info mr-2"></i>Інформація про відправку актів на сервіс "Вчасно"</h5>
                                 <div class="card-tools">
                                     <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
                                     </button>
@@ -518,7 +518,7 @@
             $('#send-invoices').click(function (e) {
                 e.preventDefault();
                 var checkBoxes = $('input:checked');
-                var progress;
+                window.count_errors = 0;
                 if (checkBoxes.length > 0) {
                     $('#ajax').html('<div class="progress-group"> <span>Відправка документів </span><b> 0/' + checkBoxes.length + '</b><div class="progress progress-sm"><div class="progress-bar bg-primary" style="width: 0%"></div></div></div>').fadeIn(500, function () {
                         $('#log-message').removeClass('no-display-alert');
@@ -532,7 +532,7 @@
                             $('#ajax').html('<div class="progress-group"><span>Відправка документів </span><b> ' + (x + 1) + '/' + checkBoxes.length + '</b><div class="progress progress-sm"><div class="progress-bar bg-primary" style="width: ' + progress + '%"></div></div></div>')
 
                         }
-                        $('#send-messages ul').append('<li> ----- Кінець передачі ---- </li>');
+                        $('#send-messages ul').append('<li> ----- Кінець передачі: оброблено ' + checkBoxes.length + ' документів. ' + window.count_errors + ' помилок. ---- </li>');
                         $('#ajax').find('span').text('Відправлено!');
                         $('#ajax').append('<a class="btn btn-primary" id="send-ok" href="#"><i class="fas fa-check"></i> Ok </a>');
                         // ---- закриття прелаодера -------
@@ -572,7 +572,9 @@
                             $(idSpan).remove();
                             $(idElement).prepend(' <span class="badge badge-warning mt-1 mr-3" id="counter' + data.id + '" style="font-size: 100%;">' + data.counter + '</span>');
                         }
-
+                        if (typeof data.error !== "undefined") {
+                            window.count_errors++;
+                        }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                         var http_kod = jqXHR.status;

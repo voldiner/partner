@@ -36,4 +36,9 @@ class LoggingRepository
             Log::channel('download_invoices')->debug($message);
         }
     }
+
+    public function createSendInvoicesLoggingMessage($message)
+    {
+        Log::channel('send_invoices')->debug($message);
+    }
 }

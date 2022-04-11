@@ -92,7 +92,11 @@ return [
             'path' => storage_path('logs/download_invoices.log'),
             'level' => 'debug',
         ],
-
+        'send_invoices' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/send_invoices.log'),
+            'level' => 'debug',
+        ],
         // --------------
         'slack' => [
             'driver' => 'slack',

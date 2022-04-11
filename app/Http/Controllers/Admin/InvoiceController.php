@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\InvoicesSearchRequest;
 use App\Models\Invoice;
+use App\Repositories\LoggingRepository;
 use Carbon\Carbon;
 use Exception;
 use App\Http\Controllers\Controller as Controller;
@@ -64,7 +65,11 @@ class InvoiceController extends Controller
         return $pdf->download('invoice.pdf');
     }
 
-    public function sendInvoiceToPartner(Request $request, InvoiceRepository $invoiceRepository)
+    public function sendInvoiceToPartner(
+        Request $request,
+        InvoiceRepository $invoiceRepository,
+        LoggingRepository $loggingRepository
+    )
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer',
@@ -72,7 +77,9 @@ class InvoiceController extends Controller
         $dateToMessage = Carbon::now()->format('d-m-Y G:i:s');
         $textError = '<span style="color: red; background-color: yellow"> Помилка! </span>';
         if ($validator->fails()) {
-            return response()->json(['error' => true, 'message' =>  "{$dateToMessage} {$textError} Error Invoice id from request"], 200);
+            $message = "{$dateToMessage} {$textError} Error Invoice id from request";
+            $loggingRepository->createSendInvoicesLoggingMessage($message);
+            return response()->json(['error' => true, 'message' => $message ], 200);
         }
 
         $id = $request->get('id');
@@ -80,19 +87,25 @@ class InvoiceController extends Controller
             $invoice = $invoiceRepository->getInvoiceById($id);
 
             if (!$invoice) {
-                return response()->json(['error' => true, $dateToMessage . 'message' => $dateToMessage . "{$textError} Invoice id={$id} not found"], 200);
+                $message = $dateToMessage . "{$textError} Invoice id={$id} not found";
+                $loggingRepository->createSendInvoicesLoggingMessage($message);
+                return response()->json(['error' => true, $dateToMessage . 'message' => $message], 200);
             }
             $monthsFromSelect = $invoiceRepository->monthsFromSelect;
 
             if (is_null($invoice->user->email_verified_at)) {
-                return response()->json(['error' => true, 'message' => "{$dateToMessage} {$textError} Користувач {$invoice->user->short_name } не має підтвердженого email"], 200);
+                $message = "{$dateToMessage} {$textError} Користувач {$invoice->user->short_name } не має підтвердженого email";
+                $loggingRepository->createSendInvoicesLoggingMessage($message);
+                return response()->json(['error' => true, 'message' => $message ], 200);
             }
             $email = $invoice->user->email;
 
            $kod = $invoiceRepository->getUserCode($invoice->user->edrpou, $invoice->user->identifier);
 
             if (is_null($kod)){
-                return response()->json(['error' => true, 'message' => "{$dateToMessage} {$textError} Користувач {$invoice->user->short_name } не має ані коду ЄДРПОУ, ні коду ІПН"], 200);
+                $message = "{$dateToMessage} {$textError} Користувач {$invoice->user->short_name } не має ані коду ЄДРПОУ, ні коду ІПН";
+                $loggingRepository->createSendInvoicesLoggingMessage($message);
+                return response()->json(['error' => true, 'message' => $message], 200);
             }
             $date = $invoice->date_invoice->format('Ymd');
             $num = $invoice->number;
@@ -108,12 +121,16 @@ class InvoiceController extends Controller
              $transfer = $invoiceRepository->sendPdfToPartner($nameFile);
 
              if (!$transfer['result']){
-                 return response()->json(['error' => true, 'message' => "{$dateToMessage} {$textError} Акт № {$invoice->number} перевізника {$invoice->user->short_name } помилка передачі на сервіс ВЧАСНО ({$transfer['message']})" ], 200);
+                 $message = "{$dateToMessage} {$textError} Акт № {$invoice->number} перевізника {$invoice->user->short_name } помилка передачі на сервіс ВЧАСНО ({$transfer['message']})";
+                 $loggingRepository->createSendInvoicesLoggingMessage($message);
+                 return response()->json(['error' => true, 'message' => $message ], 200);
              }
 
 
         } catch (Exception $exception) {
-            return response()->json(['error' => true, 'message' => $dateToMessage . ' ' . $textError . $exception->getMessage()], 200);
+            $message = $dateToMessage . ' ' . $textError . $exception->getMessage();
+            $loggingRepository->createSendInvoicesLoggingMessage($message);
+            return response()->json(['error' => true, 'message' => $message], 200);
         }
 
         $invoice->counter_sending++;
@@ -123,6 +140,7 @@ class InvoiceController extends Controller
         $result['id'] = $id;
         $result['message'] = $dateToMessage . '  Акт №' . $invoice->number . ' перевізник ' . $invoice->user->short_name . 'успішно передано в ВЧАСНО (id = ' . $transfer['message'] . ')';
         $result['counter'] = $invoice->counter_sending;
+        $loggingRepository->createSendInvoicesLoggingMessage($result['message']);
         return response()->json($result, 200);
     }
 }
