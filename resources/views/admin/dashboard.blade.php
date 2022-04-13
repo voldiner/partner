@@ -129,21 +129,23 @@
                                     <form action="{{ route('manager.index') }}" method="get">
                                         <div class="row">
                                             <div class="col-md-4">
-                                                <!-- multiple -->
                                                 <div class="form-group">
                                                     <label>Критерій пошуку</label>
-                                                    <select id="category" name="months[]" class="select2"
-                                                            multiple="multiple"
-                                                            data-placeholder="Виберіть критерій пошуку"
-                                                            style="width: 100%;">
-                                                        @foreach($parametersForSelect as $key => $value)
-                                                            @if($key === $paramSelected)
-                                                                <option value="{{ $key }}"
-                                                                        selected>{{ $value }}</option>
-                                                            @else
-                                                                <option value="{{ $key }}">{{ $value }}</option>
-                                                            @endif
-                                                        @endforeach
+                                                    <select class="form-control" name="parameter" id="parameter">
+                                                        @if(!$paramSelected)
+                                                            <option value="0" selected>Виберіть критерій пошуку</option>
+                                                        @endif
+                                                            @foreach($parametersForSelect as $key => $value)
+                                                                @if($key === $paramSelected)
+                                                                    <option value="{{ $key }}"
+                                                                            selected>{{ $value }}</option>
+                                                                @elseif($key == old('parameter'))
+                                                                    <option value="{{ $key }}"
+                                                                            selected>{{ $value }}</option>
+                                                                @else
+                                                                    <option value="{{ $key }}">{{ $value }}</option>
+                                                                @endif
+                                                            @endforeach
                                                     </select>
                                                 </div>
                                             </div>
@@ -154,13 +156,32 @@
                                                            class="form-control @error('signature') is-invalid @enderror"
                                                            value="{{ old('signature',$signature) }}" id="signature" name="signature"
                                                            placeholder="що шукати">
-                                                    @error('year')
+                                                    @error('signature')
                                                     <div class="invalid-feedback" style="display: block;">
                                                         {{ $message }}
                                                     </div>
                                                     @enderror
                                                 </div>
                                             </div>
+
+                                            <div class="col-md-4">
+                                                @if($paramSelected && $signature )
+                                                    <div class="card card-gray rounded-pill mb-0 mt-3">
+                                                        <div class="card-header rounded-pill">
+                                                            <p class="card-title">
+                                                                <a class="btn btn-danger btn-sm"
+                                                                   href="{{ route('manager.index') }}">
+                                                                    <i class="fas fa-trash">
+                                                                    </i>
+                                                                    Скасувати
+                                                                </a>
+                                                                <span class="mr-2 ml-2">Знайдено {{ $countUsers }} перевізників.</span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </div>
+
                                         </div>
                                         <div class="row">
                                             <div class="col-md-2 col-6">
@@ -267,7 +288,10 @@
 
             //Initialize Select2 Elements
             $('.select2').select2();
-
+            // ---критерій пошуку
+            //$( "#parameter" ).change(function() {
+           //     $(this).attr("name", this.value);
+           // });
 
         })
 

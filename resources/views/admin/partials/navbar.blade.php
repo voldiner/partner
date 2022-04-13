@@ -11,7 +11,6 @@
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="navbar-collapse order-1 collapse" id="navbarCollapse" style="">
-
         <form class="form-inline" action="{{ route('manager.set_carrier') }}" method="post">
             @csrf
             <div class="input-group mb-md-0 mb-2">
@@ -33,14 +32,9 @@
                     @else
                         <option selected="selected" value="0">вкажіть перевізника</option>
                     @endif
-
-                    {{--<option selected="selected" data-select2-id="3">Alabama</option>--}}
-                    {{--<option data-select2-id="31">Alaska</option>--}}
-                    {{--<option data-select2-id="32">California</option>--}}
-                    {{--<option data-select2-id="33">Delaware</option>--}}
-                    {{--<option data-select2-id="34">Tennessee</option>--}}
-                    {{--<option data-select2-id="35">Texas</option>--}}
-                    {{--<option data-select2-id="36">Washington</option>--}}
+                    @if(\Request::route()->getName() === 'manager.index')
+                            <input type="hidden" value="1" name="carrier">
+                    @endif
                 </select>
             </div>
         </form>

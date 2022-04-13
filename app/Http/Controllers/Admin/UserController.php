@@ -7,10 +7,16 @@ use App\Models\User;
 use App\Repositories\Admin\UserRepository;
 use Illuminate\Http\Request;
 
+
 class UserController extends Controller
 {
     public function index( Request $request, UserRepository $userRepository)
     {
+        $validator = $userRepository->validateUserSearchRequest($request);
+
+        if ($validator->fails()) {
+           return back()->withErrors($validator)->withInput();
+        }
 
         $usersForList = $userRepository->getUsersFromQuery($request);
         $usersForList = collect([]); // тимчасово
@@ -19,13 +25,15 @@ class UserController extends Controller
         $parametersForSelect = $userRepository->getParametersForSelect();
         $paramSelected = $userRepository->paramSelected;
         $signature = $userRepository->signature;
+        $countUsers = $userRepository->countUsers;
         return view('admin.dashboard', compact(
             'users',
             'statistic',
             'usersForList',
             'parametersForSelect',
             'paramSelected',
-            'signature'
+            'signature',
+            'countUsers'
         ));
     }
 
@@ -47,7 +55,10 @@ class UserController extends Controller
 
         session(['atpId' => $atp->id]);
         session(['atpName' => $atp->full_name]);
-
+        //dd(url()->previous());
+        if ($request->has('carrier')){
+            return redirect(route('manager.index'));
+        }
         return back();
     }
 }

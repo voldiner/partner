@@ -9,9 +9,11 @@
 namespace App\Repositories\Admin;
 
 
+use Illuminate\Validation\Rule;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class UserRepository
 {
@@ -69,40 +71,39 @@ class UserRepository
 
     public function getUsersFromQuery(Request $request)
     {
+
+
         $users_to_page = config('partner.users_to_page');
 
-        if ($request->hasAny(['months', 'year'])) {
+        if ($request->has(['parameter', 'signature']) && (!is_null($request->get('signature')))) {
+            // --- скасувати відбір по назві перевізника
+            session(['atpId' => 0]);
+            session()->forget('atpName');
+            $this->paramSelected = $request->get('parameter');
+            $this->signature = $request->get('signature');
+            $query = User::query();
 
-            $query = Invoice::query();
-            // ---- підготовка масиву умов відбору and --------
-            $conditionsAnd = [];
-            if ($request->has('year') && (!is_null($request->get('year')))) {
-                $this->year = $request->get('year');
-                $conditionsAnd[] = ['year', '=', $request->get('year')];
+            if ($request->get('parameter') === 'kod_fxp' ) {
+                $this->signature = $request->get('signature');
+                $conditionsAnd[] = ['kod_fxp', '=', $request->get('signature')];
+            }else{
+                $conditionsAnd[] = [$request->get('parameter'), 'like', '%' . $request->get('signature') . '%'];
             }
 
             if ($request->session()->has('atpId') && session('atpId') != 0){
-                $conditionsAnd[] = ['user_id', '=', session('atpId')];
+                $conditionsAnd[] = ['id', '=', session('atpId')];
             }
 
             $query->where($conditionsAnd);
-            // ----------- OR statement ------------------------- //
-            if ($request->has('months')) {
-                foreach ($this->monthsFromSelect as $key => $month){
-                    if (in_array($key, $request->get('months') ) ){
-                        $this->monthsSelected[$key] = $month;
-                    }
-                }
-                $query->whereIn('month', $request->get('months'));
-            }
+
         } else {
 
-            $query = Invoice::query();
+            $query = User::query();
             if ($request->session()->has('atpId') && session('atpId') != 0){
                 $query->where('id', '=', session('atpId'));
             }
         }
-
+        //dd($query->get());
         $this->countUsers = $query->count();
 
         $users = $query
@@ -116,8 +117,38 @@ class UserRepository
 
     public function getParametersForSelect()
     {
-        $result = config('partner.users_parameters_to_find');
+        $result = config('partner.users_parameters_to_find', []);
 
         return $result;
+    }
+
+    public function validateUserSearchRequest(Request $request)
+    {
+        $values =  array_keys(config('partner.users_parameters_to_find',[]));
+        $validator = Validator::make($request->all(), [
+            'parameter' => [
+                Rule::in($values),
+            ]
+        ]);
+        $validator->sometimes('signature', 'required|integer', function ($input) {
+            return $input->parameter === 'kod_fxp';
+        });
+        $validator->sometimes('signature', 'required|string|max:40', function ($input) {
+            return $input->parameter === 'email';
+        });
+        $validator->sometimes('signature', 'required|numeric', function ($input) {
+            return $input->parameter === 'identifier';
+        });
+        $validator->sometimes('signature', 'required|numeric', function ($input) {
+            return $input->parameter === 'certificate';
+        });
+        $validator->sometimes('signature', 'required|numeric', function ($input) {
+            return $input->parameter === 'certificate_tax';
+        });
+        $validator->sometimes('signature', 'required|numeric', function ($input) {
+            return $input->parameter === 'edrpou';
+        });
+
+        return $validator;
     }
 }
