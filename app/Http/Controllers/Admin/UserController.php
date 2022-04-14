@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Repositories\Admin\UserRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Lang;
 
 
 class UserController extends Controller
@@ -19,13 +20,14 @@ class UserController extends Controller
         }
 
         $usersForList = $userRepository->getUsersFromQuery($request);
-        $usersForList = collect([]); // тимчасово
+
         $statistic = $userRepository->getStatistic();
         $users = $userRepository->getUsersToSelect();
         $parametersForSelect = $userRepository->getParametersForSelect();
         $paramSelected = $userRepository->paramSelected;
         $signature = $userRepository->signature;
         $countUsers = $userRepository->countUsers;
+        $countMessage = $userRepository->getCountMessage($countUsers);
         return view('admin.dashboard', compact(
             'users',
             'statistic',
@@ -33,7 +35,8 @@ class UserController extends Controller
             'parametersForSelect',
             'paramSelected',
             'signature',
-            'countUsers'
+            'countUsers',
+            'countMessage'
         ));
     }
 

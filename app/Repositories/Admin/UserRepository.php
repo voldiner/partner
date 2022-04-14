@@ -151,4 +151,25 @@ class UserRepository
 
         return $validator;
     }
+
+    public function getCountMessage($count)
+    {
+        $count = intval($count);
+        $result = 'перевізників';
+        if ($count > 4 && $count<20){
+            return 'перевізників';
+        }
+
+        $stringCount = substr(strval($count), -1);
+        if ($stringCount === '4' || $stringCount === '3' || $stringCount === '2'){
+            $result = 'перевізника';
+        }elseif ($stringCount === '1'){
+            $result = 'перевізник';
+        }else {
+            $result = 'перевізників';
+        }
+
+        return $result;
+
+    }
 }
