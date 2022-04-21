@@ -15,6 +15,7 @@
         }
         .my-header{
             background-color: #7adeee;
+            padding-left: 3px;
         }
     </style>
 @endsection
@@ -207,7 +208,7 @@
                         <div class="col-12">
                             @forelse ($usersForList as $user)
                                 <div class="card card-info collapsed-card mb-1">
-                                    <div class="card-header pb-0 pt-0">
+                                    <div class="card-header pb-0 pt-0" style="color: black;">
                                         <div class="row justify-content-start">
                                             <div class="col-xl-3 col-12 text-xl-left p-2">
                                                 <span class="pl-2" style="margin-right: 15px;">{{ ($usersForList->currentPage() - 1) * $usersForList->perPage() + $loop->iteration }}
@@ -231,9 +232,10 @@
                                             </div>
                                             <div class="card-tools col text-right p-2" id="divcounter">
                                                 {{--@if($invoice->counter_sending > 0)--}}
-                                                    <span class="badge badge-warning mr-3" style="font-size: 100%;">Помилки</span>
+                                                @if(count($user->check_property()))
+                                                    <span class="badge badge-warning mr-3" style="font-size: 100%;">Помилки: {{ count($user->check_property()) }}</span>
                                                 {{--@endif--}}
-
+                                                @endif
                                                 <button type="button" class="btn btn-tool mr-2" data-card-widget="collapse">
                                                     <i class="fas fa-plus"></i>
                                                 </button>
@@ -242,88 +244,102 @@
                                     </div>
                                     <!-- /.card-header -->
                                     <div class="card-body" style="display: none;">
+                                        @if(count($user->check_property()))
+                                            <div class="row">
+                                                <div class="col-12 callout callout-danger">
+                                                    <h5>Попередження!</h5>
+                                                    <p>При контролі реквізитів перевізника виявлені наступні помилки:</p>
+                                                    <ul>
+                                                        @foreach($user->check_property() as $item)
+                                                            <li>{{ $item }}</li>
+                                                        @endforeach
+                                                    </ul>
+
+                                                </div>
+                                            </div>
+                                        @endif
                                         <div class="row">
-                                              <div class="col-5 mb-2">
+                                              <div class="col-xl-5 col-12 mb-2">
                                                   <p class="mb-1 my-header">Повна назва </p>
                                                   <p class="post">{{ $user->full_name }}</p>
                                               </div>
-                                            <div class="col-4 mb-2">
+                                            <div class="col-xl-4 col-sm-6 mb-2">
                                                 <p class="mb-1 my-header">Скорочена назва </p>
                                                 <p class="post">{{ $user->short_name }}</p>
                                             </div>
-                                              <div class="col-3 mb-2">
+                                              <div class="col-xl-3 col-sm-6 mb-2">
                                                   <p class="mb-1 my-header">Адреса e-mail </p>
                                                   <p class="post">{{ $user->email }} @if($user->email_verified_at)<span><i class="fas fa-check"></i></span>@else<span><i class="fas fa-question"></i></span> @endif</p>
                                               </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-2 mb-2">
-                                                <p class="mb-1 my-header">Код від ВОПАС </p>
+                                            <div class="col-md-2 col-sm-4 mb-2">
+                                                <p class="mb-1 my-header">Код ВОПАС</p>
                                                 <p class="post">{{ $user->kod_fxp }}</p>
                                             </div>
-                                            <div class="col-3 mb-2">
+                                            <div class="col-md-3 col-sm-4 mb-2">
                                                 <p class="mb-1 my-header">Ідентифікаційний код</p>
                                                 <p class="post">{{ $user->identifier }}</p>
                                             </div>
-                                            <div class="col-2 mb-2">
+                                            <div class="col-md-2 col-sm-4 mb-2">
                                                 <p class="mb-1 my-header">Код ЄДРПОУ</p>
                                                 <p class="post">{{ $user->edrpou }}</p>
                                             </div>
-                                            <div class="col-2 mb-2">
-                                                <p class="mb-1 my-header">Номер свідоцтва</p>
+                                            <div class="col-md-2 col-sm-6 mb-2">
+                                                <p class="mb-1 my-header">Cвідоцтво</p>
                                                 <p class="post">{{ $user->certificate }}</p>
                                             </div>
-                                            <div class="col-3 mb-2">
+                                            <div class="col-md-3 col-sm-6 mb-2">
                                                 <p class="mb-1 my-header">Інд.податковий номер</p>
                                                 <p class="post">{{ $user->certificate_tax }}</p>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-3 mb-2">
+                                            <div class="col-md-3 col-sm-6 mb-2">
                                                 <p class="mb-1 my-header">Відрахування від тарифу:  </p>
                                                 <p class="post">{{ $user->percent_retention_tariff }} &#37;</p>
                                             </div>
-                                            <div class="col-3 mb-2">
+                                            <div class="col-md-3 col-sm-6 mb-2">
                                                 <p class="mb-1 my-header">Відрахування від страх.збору ВОПАС:  </p>
                                                 <p class="post">{{ $user->percent_retention__insurance }} &#37;</p>
                                             </div>
-                                            <div class="col-3 mb-2">
+                                            <div class="col-md-3 col-sm-6 mb-2">
                                                 <p class="mb-1 my-header">Відрахування від страх.збору страховику:  </p>
                                                 <p class="post">{{ $user->percent_retention__insurer }} &#37;</p>
                                             </div>
-                                            <div class="col-3 mb-2">
+                                            <div class="col-md-3 col-sm-6 mb-2">
                                                 <p class="mb-1 my-header">Відрахування від багажу:  </p>
                                                 <p class="post">{{ is_null($user->percent_retention__baggage) ? 0 : $user->percent_retention__baggage }} &#37;</p>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-6 mb-2">
+                                            <div class="col-md-6 mb-2">
                                                 <p class="mb-1 my-header">Адреса:  </p>
                                                 <p class="post">{{ $user->address }}</p>
                                             </div>
-                                            <div class="col-6 mb-2">
+                                            <div class="col-md-6 mb-2">
                                                 <p class="mb-1 my-header">Страховик:  </p>
                                                 <p class="post">{{ $user->insurer }}</p>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-2 mb-2">
+                                            <div class="col-md-2 col-sm-4 mb-2">
                                                 <p class="mb-1 my-header">Договір:  </p>
                                                 <p class="post">{{ $user->num_contract }} від {{ $user->date_contract->format('d.m.Y') }}</p>
                                             </div>
-                                            <div class="col-2 mb-2">
+                                            <div class="col-md-2 col-sm-4 mb-2">
                                                 <p class="mb-1 my-header">Телефон:  </p>
                                                 <p class="post">{{ $user->telephone}} </p>
                                             </div>
-                                            <div class="col-2 mb-2">
+                                            <div class="col-md-2 col-sm-4 mb-2">
                                                 <p class="mb-1 my-header">Платник ПДВ:  </p>
                                                 <p class="post">{{ $user->is_pdv ? 'Так' : 'Ні'}} </p>
                                             </div>
-                                            <div class="col-2 mb-2">
+                                            <div class="col-md-2 col-sm-6 mb-2">
                                                 <p class="mb-1 my-header">Інкасація:  </p>
                                                 <p class="post">{{ $user->collection ? 'Так' : 'Ні'}} </p>
                                             </div>
-                                            <div class="col-4 mb-2">
+                                            <div class="col-md-4 col-sm-6 mb-2">
                                                  @if((!$user->email) && (!$user->password))
                                                     <p class="mb-1 my-header">Тимчасовий пароль</p>
                                                     <p class="post">{{ $user->password_fxp }}</p>

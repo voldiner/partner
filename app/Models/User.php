@@ -130,4 +130,27 @@ class User extends Authenticatable
          return $this->hasMany(Report::class);
     }
 
+    public function check_property()
+    {
+        $result = [];
+
+        if (!$this->email_verified_at){
+            $result['email_verified_at'] = 'Не підтверджена адреса e-mail';
+        }
+        if (!$this->email){
+            $result['email'] = 'Перевізник не зареєструвався';
+        }
+        if (empty($this->edrpou) && empty($this->identifier)){
+            $result['edrpou'] = 'Не вказаний ні ідентифікаційний код, ні код ЄДРПОУ';
+        }
+        if (empty($this->short_name)){
+            $result['short_name'] = 'Не вказана скорочена назва';
+        }
+        if (empty($this->full_name)){
+            $result['full_name'] = 'Не вказана повна назва';
+        }
+        return $result;
+
+    }
+
 }
