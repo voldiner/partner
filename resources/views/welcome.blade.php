@@ -10,6 +10,8 @@
           integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
     <style>
         body {
             margin: 0;
@@ -63,6 +65,19 @@
         #video12 img:focus {
             opacity: .2;
         }
+        .footer a{
+        text-decoration: none;
+        color: #fff;
+        }
+        .footer a:hover {
+            text-decoration: none; color: #fff200;
+        }
+        .footer b{
+            font-family: 'Roboto', sans-serif;
+            font-weight: normal;
+            font-size: 90%;
+        }
+
     </style>
     <title>Привет, мир!</title>
 </head>
@@ -82,10 +97,10 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Про серіс</a>
+                    <a class="nav-link" href="#about">Про серіс</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Допомога</a>
+                    <a class="nav-link" href="#help">Допомога</a>
                 </li>
                 @auth
                     <li class="nav-item">
@@ -118,7 +133,7 @@
         <div class="col-md-9 text-center pt-2 pt-md-5" style="background-color: #f7e236">
             <h1 class="mt-2 mt-md-5 font-weight-bold" style="color: #333;">Електронний кабінет перевізника</h1>
             <p class="mt-4" style="font-size: 120%;">ПрАТ "Волинське обласне підприємство автобусних станцій"</p>
-            <p><a href="#" class="btn btn-primary btn-lg" tabindex="-1" role="button">Про сервіс</a></p>
+            <p><a href="#about" class="btn btn-primary btn-lg" tabindex="-1" role="button">Про сервіс</a></p>
         </div>
     </div>
     <div class="row" style="background-color: #f3f6f8">
@@ -162,9 +177,22 @@
             </div>
         </div>
         <div class="col-md-6">
-
+            <div class="callout callout-info m-3">
+                <div class="row align-items-center">
+                    <div class="col-2">
+                        <img src="{{ asset('dist/img/dollar.png') }}" class="img-fluid" alt="logo">
+                    </div>
+                    <div class="col-10">
+                        <p>Безкоштовний</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+
+
+
     {{-- початок роботи з сервісом--}}
 
     <div class="row">
@@ -181,7 +209,7 @@
                     <span class="pb-3 pt-3 pl-4 pr-4 text-center m-3 nomer">1</span>
                 </div>
                 <div class="col-9">
-                    Зареєструйтеся на сервісі "Partner"
+                    Отримайте тимчасовий пароль для реєстрації в ПрАТ "ВОПАС"
                 </div>
             </div>
         </div>
@@ -191,7 +219,7 @@
                     <span class="pb-3 pt-3 pl-4 pr-4 text-center m-3 nomer">2</span>
                 </div>
                 <div class="col-9">
-                    Підтвердіть адресу електронної пошти
+                    Зареєструйтеся на сервісі "Partner"
                 </div>
             </div>
         </div>
@@ -203,7 +231,7 @@
                     <span class="pb-3 pt-3 pl-4 pr-4 text-center m-3 nomer">3</span>
                 </div>
                 <div class="col-9">
-                    Зайдіть на сторінку НАЛАШТУВАННЯ та звірте ваші реквізити
+                    Підтвердіть адресу електронної пошти
                 </div>
             </div>
         </div>
@@ -213,7 +241,7 @@
                     <span class="pb-3 pt-3 pl-4 pr-4 text-center m-3 nomer">4</span>
                 </div>
                 <div class="col-9">
-                    Підтвердіть адресу електронної пошти
+                    Зайдіть на сторінку НАЛАШТУВАННЯ та звірте ваші реквізити
                 </div>
             </div>
         </div>
@@ -222,14 +250,26 @@
     <div class="row pt-5 pb-5" style="background-color: #f3f6f8">
         <div class="col-lg-4 p-5 offset-lg-1 shadow-sm mb-5" style="background-color: #ffffff; border-radius: 10px">
             <h3 class="text-center"><strong>Для кого створений сервіс PARTNER</strong></h3>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias assumenda at autem, blanditiis consequatur,
-            corporis culpa deserunt doloremque dolorum eos esse fugiat hic molestiae molestias nam necessitatibus
-            officia officiis pariatur placeat quae quasi qui quia sapiente sed sequi temporibus velit.
+            Якщо ви:
+            <ul>
+                <li>здійснюєте регулярні пасажирські перевезення автомобільним транспортом</li>
+                <li>ваші автобуси курсують від автостанцій Волинської області, що належать ПрАТ "ВОПАС"</li>
+                <li>на ваші автобуси здійснюється продаж квитків на цих автостанціях</li>
+                <li>у вас укладена угода про надання послуг з ПрАТ "ВОПАС"</li>
+            </ul>
+            В такому разі сервіс PARTNER для вас.
+
         </div>
         <div class="col-lg-4 p-5 offset-lg-2 shadow-sm mb-5" style="background-color: #ffffff; border-radius: 10px">
+            <a name="about"></a>
             <h3 class="text-center"><strong> Про сервіс PARTNER</strong></h3>
-            corporis culpa deserunt doloremque dolorum eos esse fugiat hic molestiae molestias nam necessitatibus
-            officia officiis pariatur placeat quae quasi qui quia sapiente sed sequi temporibus velit.
+            Електронний кабінет перевізника надає доступ зареєстрованим користувачам до наступних документів:
+            <ul>
+                <li>Акти виконаних робіт</li>
+                <li>Відомості проданих квитків на автостанціях ПрАТ "ВОПАС"</li>
+            </ul>
+            Сервіс дає можливість пошуку необхідних документів та їх роздруку.
+            Долучайтеся до сервісу "Електронний кабінет перевізника"!
         </div>
     </div>
     {{-- відеоролики --}}
@@ -240,7 +280,8 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-6 offset-md-3 pb-4">
+        <div class="col-md-6 offset-md-3 pb-4">
+            <a name="help"></a>
             <div id="video12">
                 <iframe width="560" height="315" src="https://www.youtube.com/embed/Sp3bATMad8o?start=10"
                         title="YouTube video player" frameborder="0" allowfullscreen></iframe>
@@ -256,7 +297,25 @@
             </div>
         </div>
     </div>
-
+    {{-- footer--}}
+    <div class="row footer" style="background-color: #007bff; color: #fff; font-size: 90%">
+        <div class="col-md-5 offset-md-1 p-4">
+            <p class="mb-2">
+                Приватне акціонерне товариство "Волинське обласне підприємство автобусних станцій"
+            </p>
+            <p class="mb-2">
+                43018 Волинська область, м.Луцьк, вул. Львівська, 148
+            </p>
+        </div>
+        <div class="col-md-5 p-4">
+            <p class="mb-2">Є питання? Зв'яжіться з нами за телефоном чи e-mail</p>
+            <p class="mb-2">Відділ перевізень: <i class="fas fa-lg fa-phone"></i> +38 050 403 53 56 <i class="fas fa-lg fa-envelope"><b>&nbsp;vpim1@ukr.net</b></i></p>
+            <p class="mb-2">Бухгалтерія: <i class="fas fa-lg fa-phone"></i> 0332 26 37 10 <i class="fas fa-lg fa-envelope"><b>&nbsp;vatvopas@ukr.net</b></i></p>
+            <p class="mb-2">Приймальня: 03322 </p>
+            <p class="mb-2"><small>пн-пт з 08:30 - 17:30</small></p>
+            <p><a href="#help">Допомога</a></p>
+        </div>
+    </div>
 </div>
 
 
