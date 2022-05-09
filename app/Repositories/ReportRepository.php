@@ -94,9 +94,10 @@ class ReportRepository
                 continue;
             }
             $places = $this->getPlacesFromDBF($record->get('kr'), $record->get('vr'), $record->get('nved'), $tablePlaces, $record->get('kod_ac'));
-            if (!$places) {
-                continue;
-            }
+            // --- введена ручна відомість може бути без пасажирів
+            //if (!$places) {
+            //    continue;
+            //}
             // ----- визначим додавати нову відомість чи коректувати стару ------- //
             // todo добавити умову по автостанції (добавив перевірити як працює) якщо відомість видалена на АС
             // todo то як при синхронізації це відобразити - ЗРОБИВ ТЕЖ
@@ -154,7 +155,7 @@ class ReportRepository
         $station = $stations->firstWhere('kod', '=', $record->get('kod_ac'));
         if (!$station) {
             $this->warnings[] = "Error not found station_id " . $record->get('kod_ac') . " report #" . $record->get('nved');
-            dump("Error not found station_id " . $record->get('kod_ac') . " report #" . $record->get('nved'));
+            //dump("Error not found station_id " . $record->get('kod_ac') . " report #" . $record->get('nved'));
         }
         return $station;
     }
@@ -173,7 +174,7 @@ class ReportRepository
         } else {
             $result = 0;
             $this->warnings[] = 'Error not found user_id ' . $record->get('katp') . ' report #' . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
-            dump(" Error not found user_id " . $record->get('katp') . " report #" . $record->get('nved'));
+            //dump(" Error not found user_id " . $record->get('katp') . " report #" . $record->get('nved'));
         }
         return $result;
     }
@@ -208,29 +209,46 @@ class ReportRepository
     protected function getPlacesFromDBF($kod_flight, $time_flight, $nomved, $table, $kod_ac)
     {
         $result = [];
-        $table->moveTo(0);
+        $record = $table->moveTo(0);
+        $place = $this->createPlace($record, $kod_flight, $time_flight);
+        if ($place) {
+            $result[] = $place;
+        }
         while ($record = $table->nextRecord()) {
-            if ($kod_flight === $record->get('kr') && $time_flight === $record->get('vr')) {
-                $result[] = new Place([
-                    'ticket_id' => $record->get('ticket_id'),
-                    'number_place' => $record->get('number'),
-                    'kod_flight' => $record->get('kr'),
-                    'time_flight' => $record->get('vr'),
-                    'name_stop' => $record->get('name_stop'),
-                    'sum' => $record->get('suma'),
-                    'num_certificate' => $record->get('num_psw'),
-                    'name_benefit' => empty($record->get('name_plg')) ? null : $record->get('name_plg'),
-                    'name_passenger' => $record->get('fml_plg'),
-                    'type' => $record->get('internet'),
-                ]);
+            $place = $this->createPlace($record, $kod_flight, $time_flight);
+            if ($place) {
+                $result[] = $place;
             }
+
         }
         if (count($result) === 0) {
             $this->warnings[] = " Error not found places report #{$nomved} код АС {$kod_ac} код рейсу {$kod_flight} час відправки {$time_flight}";
-            dump(" Error not found places report #{$nomved}");
+            //dump(" Error not found places report #{$nomved}");
             return false;
         }
         return $result;
+    }
+
+    protected function createPlace($record, $kod_flight, $time_flight)
+    {
+        if ($kod_flight === $record->get('kr') && $time_flight === $record->get('vr')) {
+            $result = new Place([
+                'ticket_id' => $record->get('ticket_id'),
+                'number_place' => $record->get('number'),
+                'kod_flight' => $record->get('kr'),
+                'time_flight' => $record->get('vr'),
+                'name_stop' => $record->get('name_stop'),
+                'sum' => $record->get('suma'),
+                'num_certificate' => $record->get('num_psw'),
+                'name_benefit' => empty($record->get('name_plg')) ? null : $record->get('name_plg'),
+                'name_passenger' => $record->get('fml_plg'),
+                'type' => $record->get('internet'),
+            ]);
+            return $result;
+        }else {
+            return false;
+        }
+
     }
 
     /**
@@ -244,27 +262,28 @@ class ReportRepository
         if (!is_numeric($record->get('katp')) || $record->get('katp') == 0) {
             $this->warnings[] = " Error validate katp " . $record->get('katp') . " report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
             $result = false;
-            dump("Error validate katp " . $record->get('katp') . " report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac'));
+            //dump("Error validate katp " . $record->get('katp') . " report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac'));
         }
         if (!is_numeric($record->get('kod_ac')) || $record->get('kod_ac') == 0) {
             $result = false;
             $this->warnings[] = " Error validate kod_ac " . $record->get('kod_ac') . " report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
-            dump("Error validate kod_ac " . $record->get('kod_ac') . " report #" . $record->get('nved'));
+            //dump("Error validate kod_ac " . $record->get('kod_ac') . " report #" . $record->get('nved'));
         }
         if ($record->get('vr') <= 0 || $record->get('vr') > 24.00) {
             $result = false;
             $this->warnings[] = "Error validate vr " . $record->get('vr') . " report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
-            dump("Error validate vr " . $record->get('vr') . " report #" . $record->get('nved'));
+            //dump("Error validate vr " . $record->get('vr') . " report #" . $record->get('nved'));
         }
+        // введена вручну відомість може бути без назви рейсу але повіомити треба
         if (empty($record->get('name_r'))) {
-            $result = false;
+            //$result = false;
             $this->warnings[] = "Error validate name_r report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
-            dump("Error validate name_r report #" . $record->get('nved'));
+            //dump("Error validate name_r report #" . $record->get('nved'));
         }
         if (!$this->validateDMY($record->get('day'), $record->get('month'), $record->get('year'))) {
             $result = false;
             $this->warnings[] = "Error validate day, month, year  report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
-            dump("Error validate day, month, year  report #" . $record->get('nved'));
+            //dump("Error validate day, month, year  report #" . $record->get('nved'));
         }
         return $result;
     }
@@ -360,7 +379,7 @@ class ReportRepository
             }
 
         } else {
-            // до 20 останніх записів
+            // без встановленого відбору показуємо встановлену квлькість останніх записів
             $lastReport = Report::
                 where('user_id', '=', auth()->user()->id)
                 ->orderBy('id', 'desc')

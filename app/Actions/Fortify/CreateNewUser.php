@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
+
 class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules;
@@ -25,7 +26,6 @@ class CreateNewUser implements CreatesNewUsers
     {
         $messages = [
             'email.required' => 'Потрібно вказати email адресу!',
-            'password.regex' => 'Мають бути: латинські - великі букви, маленькі букви, цифри. Довжина від 8 до 20 символів',
             'password_fxp.exists' => 'Реєстраційний ключ введено невірно'
         ];
 
@@ -58,11 +58,5 @@ class CreateNewUser implements CreatesNewUsers
         Mail::send(new UserRegisterMessageForAdmin($user->name, $user->id));
 
         return $user;
-        // ------------------------------------
-        //        return User::create([
-        //            'name' => $input['name'],
-        //            'email' => $input['email'],
-        //            'password' => Hash::make($input['password']),
-        //        ]);
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Actions\Fortify;
 
 use Laravel\Fortify\Rules\Password;
-
+use App\Actions\ValidatePassword as PasswordL;
 trait PasswordValidationRules
 {
     /**
@@ -17,7 +17,7 @@ trait PasswordValidationRules
                 'string',
                 new Password,
                 'confirmed',
-               'regex:((?=.*d)(?=.*[a-z])(?=.*[A-Z])(?=.*[1-9]).{8,20})'
+                PasswordL::min(8)->letters()->mixedCase()->numbers(),
         ];
     }
 }

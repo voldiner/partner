@@ -75,7 +75,7 @@
         .footer b{
             font-family: 'Roboto', sans-serif;
             font-weight: normal;
-            font-size: 90%;
+            font-size: 85%;
         }
 
     </style>
@@ -84,7 +84,7 @@
 <body>
 <div class="container-fluid" style="padding-left: 0px; padding-right: 0px">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="{{ route('welcome') }}">
             <img src="{{ asset('dist/img/logo.png') }}" width="35" height="35"
                  class="d-inline-block align-top bg-white rounded-circle ml-3 mr-3" alt="">
             <span style="letter-spacing: 3px;"><b>PARTNER</b></span>
@@ -283,11 +283,10 @@
         <div class="col-md-6 offset-md-3 pb-4">
             <a name="help"></a>
             <div id="video12">
-                <iframe width="560" height="315" src="https://www.youtube.com/embed/Sp3bATMad8o?start=10"
-                        title="YouTube video player" frameborder="0" allowfullscreen></iframe>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/6F2Pd1RdPPs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 <div>
-                    <img src="http://img.youtube.com/vi/phTSw6XDATw/0.jpg"
-                         data-src="https://www.youtube.com/embed/phTSw6XDATw"/>
+                    <img src="http://img.youtube.com/vi/6F2Pd1RdPPs/0.jpg"
+                         data-src="https://www.youtube.com/embed/6F2Pd1RdPPs"/>
                     <img src="http://img.youtube.com/vi/tkyBM-LIc5U/0.jpg"
                          data-src="https://www.youtube.com/embed/tkyBM-LIc5U"/>
                     <img src="http://img.youtube.com/vi/wS7fYSiPb5E/0.jpg"
@@ -312,6 +311,7 @@
             <p class="mb-2">Відділ перевізень: <i class="fas fa-lg fa-phone"></i> +38 050 403 53 56 <i class="fas fa-lg fa-envelope"><b>&nbsp;vpim1@ukr.net</b></i></p>
             <p class="mb-2">Бухгалтерія: <i class="fas fa-lg fa-phone"></i> 0332 26 37 10 <i class="fas fa-lg fa-envelope"><b>&nbsp;vatvopas@ukr.net</b></i></p>
             <p class="mb-2">Приймальня: 03322 </p>
+            <p class="mb-2">Тех.підтримка: <i class="fas fa-lg fa-phone"></i> +38 099 111 11 11 <i class="fas fa-lg fa-envelope"><b>&nbsp;info@vopas.com.ua</b></i> </p>
             <p class="mb-2"><small>пн-пт з 08:30 - 17:30</small></p>
             <p><a href="#help">Допомога</a></p>
         </div>

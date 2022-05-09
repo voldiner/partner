@@ -4,7 +4,7 @@
     <a href="{{ route('home') }}" class="brand-link">
         <img src="{{ asset('dist/img/logo.png') }}"
              alt="PARTNER"
-             class="brand-image-xl ml-4 bg-white img-circle"
+             class="brand-image-xl ml-3 mr-2 bg-white img-circle"
             >
         <span class="brand-text"><b>PARTNER</b></span>
     </a>
@@ -27,39 +27,10 @@
                 data-accordion="false">
                 <!-- Add icons to the links using the .nav-icon class
                      with font-awesome or any other icon font library -->
-                <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p>
-                            Dashboard
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="../index.html" class="nav-link active">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Dashboard v1</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../index2.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Dashboard v2</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Dashboard v3</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nav-header">EXAMPLES</li>
+                {{--<li class="nav-header">EXAMPLES</li>--}}
                 <li class="nav-item">
                     <a href="{{ route('home') }}" class="nav-link @if(Route::currentRouteName()== 'home') active @endif">
-                        <i class="nav-icon far fa-address-card"></i>
+                        <i class="nav-icon fas fa-house-user"></i>
                         <p>
                             Домашня
                             {{--<span class="right badge badge-danger">New</span>--}}
@@ -77,7 +48,7 @@
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('reports.index') }}" class="nav-link @if(Route::currentRouteName()== 'reports.index') active @endif">
-                        <i class="nav-icon far fa-address-card"></i>
+                        <i class="nav-icon fas fa-file-alt"></i>
                         <p>
                             Відомості
                             {{--<span class="right badge badge-danger">New</span>--}}
@@ -86,7 +57,7 @@
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('invoices.index') }}" class="nav-link @if(Route::currentRouteName()== 'invoices.index') active @endif">
-                        <i class="nav-icon far fa-address-card"></i>
+                        <i class="nav-icon fas fa-people-arrows"></i>
                         <p>
                             Акти виконаних робіт
                             {{--<span class="right badge badge-danger">New</span>--}}
@@ -95,96 +66,12 @@
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('places.index') }}" class="nav-link @if(Route::currentRouteName()== 'places.index') active @endif">
-                        <i class="nav-icon far fa-address-card"></i>
+                        <i class="nav-icon fas fa-bus"></i>
                         <p>
                             Квитки
                             {{--<span class="right badge badge-danger">New</span>--}}
                         </p>
                     </a>
-                </li>
-
-                <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon far fa-plus-square"></i>
-                        <p>
-                            Extras
-                            <i class="fas fa-angle-left right"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="../examples/login.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Login</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../examples/register.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Register</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../examples/forgot-password.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Forgot Password</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../examples/recover-password.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Recover Password</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../examples/lockscreen.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Lockscreen</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../examples/legacy-user-menu.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Legacy User Menu</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../examples/language-menu.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Language Menu</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../examples/404.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Error 404</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../examples/500.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Error 500</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../examples/pace.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Pace</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../examples/blank.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Blank Page</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../starter.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Starter Page</p>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
             </ul>
         </nav>
