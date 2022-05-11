@@ -15,6 +15,8 @@ use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 */
 
 Route::get('/', [\App\Http\Controllers\IndexController::class, 'welcome'])->name('welcome');
+//Route::get('/401', [\App\Http\Controllers\IndexController::class, 'welcome401']);
+
 
 // ---- create users from download file
 Route::get('/users/create', [\App\Http\Controllers\UserController::class, 'createUsers']);

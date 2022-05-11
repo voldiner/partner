@@ -24,4 +24,9 @@ class IndexController extends Controller
 
         return view('welcome');
     }
+
+//    public function welcome401()
+//    {
+//        return view('errors.401');
+//    }
 }

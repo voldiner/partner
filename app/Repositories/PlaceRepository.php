@@ -74,7 +74,7 @@ class PlaceRepository
 
             $key = (crc32(serialize($request->except('page'))));
             if (Cache::has($key)){
-                dump('get from cache');
+                //dump('get from cache');
                 $this->result = Cache::get($key);
                 $this->countPlaces = count($this->result);
                 return $this->result;
