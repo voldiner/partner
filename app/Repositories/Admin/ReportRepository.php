@@ -30,7 +30,7 @@ class ReportRepository extends Repository
     {
         parent::__construct();
         $this->message = null;
-        $this->max_reports_to_view = config('partner.last_reports_to_view', 100) + 1;
+        $this->max_reports_to_view = config('partner.last_reports_to_view', 100);
     }
 
     public function getReportsFromQuery(ReportsSearchRequest $request, $withPlaces = true, $isPaginator = true)
@@ -42,7 +42,7 @@ class ReportRepository extends Repository
             // ---- підготовка масиву умов відбору and --------
             $conditionsAnd = [];
             if ($request->has('interval')) {
-                $this->dateStart = Carbon::createFromFormat('d/m/Y', $request->get('dateStart'));
+                $this->dateStart = Carbon::createFromFormat('d/m/Y H', $request->get('dateStart') . '00');
                 $this->dateFinish = Carbon::createFromFormat('d/m/Y', $request->get('dateFinish'));
                 $conditionsAnd[] = ['date_flight', '>=', $this->dateStart];
                 $conditionsAnd[] = ['date_flight', '<=', $this->dateFinish];
@@ -76,22 +76,31 @@ class ReportRepository extends Repository
 
         if (!$this->countControl()) {
             if (!$isPaginator) {
-                $reports = $query->orderBy('date_flight')
+                $reports = $query->orderBy('date_flight')->orderBy('kod_ac')->orderBy('time_flight')
                     ->with('station')
-                    ->take($last_reports_to_view + 1)
+                    ->take($last_reports_to_view + 3)
                     ->get();
+
                 return $reports;
             }
-            $lastReport = $query->orderBy('date_flight')
-                ->skip($last_reports_to_view + 1)
+            $lastReport = $query->orderBy('date_flight')->orderBy('kod_ac')->orderBy('time_flight')
+                ->skip($last_reports_to_view + 3)
                 ->take(1)
                 ->get();
+
             if ($lastReport->count() == 1) {
                 $lastReportID = $lastReport[0]->id;
                 $query->where('id', '<', $lastReportID);
             }
         }else{
-            $query->orderBy('date_flight');
+            if (!$isPaginator) {
+                $reports = $query->orderBy('date_flight')->orderBy('kod_ac')->orderBy('time_flight')
+                    ->with('station')
+                    ->get();
+
+                return $reports;
+            }
+            $query->orderBy('date_flight')->orderBy('kod_ac')->orderBy('time_flight');
         }
 
         if ($withPlaces) {

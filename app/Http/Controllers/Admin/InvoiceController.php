@@ -28,7 +28,7 @@ class InvoiceController extends Controller
         $monthsSelected = $invoiceRepository->monthsSelected;
         $year = $invoiceRepository->year;
         $users = $invoiceRepository->getUsersToSelect();
-
+        $message = $invoiceRepository->message;
         return view('admin.invoices', compact
         (
             'invoices',
@@ -36,7 +36,8 @@ class InvoiceController extends Controller
             'monthsFromSelect',
             'monthsSelected',
             'year',
-            'users'
+            'users',
+            'message'
         ));
 
     }

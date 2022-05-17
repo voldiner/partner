@@ -24,8 +24,8 @@ use \App\Repositories\InvoiceRepository as Repository;
 class InvoiceRepository extends Repository
 {
     public $warnings, $countInvoices;
-    protected $stations;
-    public $monthsSelected, $monthsFromSelect, $year;
+    protected $stations, $max_invoices_to_view;
+    public $monthsSelected, $monthsFromSelect, $year, $message;
 
     public function __construct()
     {
@@ -48,14 +48,16 @@ class InvoiceRepository extends Repository
            12 => 'грудень',
         ];
         $this->year = null;
+        $this->message = null;
+        $this->max_invoices_to_view = null;
     }
 
 
     public function getInvoicesFromQuery(InvoicesSearchRequest $request)
     {
 
-        $last_invoices_to_view = config('partner.last_invoices_to_view');
-        $invoices_to_page = config('partner.invoices_to_page');
+        $this->max_invoices_to_view = config('partner.last_invoices_to_view', 100);
+        $invoices_to_page = config('partner.invoices_to_page', 10);
 
         if ($request->hasAny(['months', 'year'])) {
 
@@ -82,31 +84,31 @@ class InvoiceRepository extends Repository
                 $query->whereIn('month', $request->get('months'));
             }
         } else {
-            // до 20 останніх записів
-            $lastInvoice = Invoice::
-            where('user_id', '=', auth()->user()->id)
+            $query = Invoice::query();
+            if ($request->session()->has('atpId') && session('atpId') != 0) {
+                $query->where('user_id', '=', session('atpId'));
+            }
+        }
+
+        $this->countInvoices = $query->count();
+        if (!$this->countControl()) {
+            // до $this->max_invoices_to_view останніх записів
+            $lastInvoice = $query
                 ->orderBy('id', 'desc')
-                ->skip($last_invoices_to_view)
+                ->skip($this->max_invoices_to_view)
                 ->take(1)
                 ->get();
 
             if ($lastInvoice->count() == 1) {
                 $lastInvoiceID = $lastInvoice[0]->id;
-                $query = Invoice::query()->where('id', '>', $lastInvoiceID);
-            } else {
-                $query = Invoice::query();
+                $query->where('id', '>', $lastInvoiceID);
             }
-            if ($request->session()->has('atpId') && session('atpId') != 0){
-                $query->where('user_id', '=', session('atpId'));
-            }
+
+        }else{
+            $query->orderBy('id', 'desc');
 
         }
-
-        $this->countInvoices = $query->count();
-
-
         $invoices = $query
-            // ->orderBy('date_flight')
             ->with('products')
             ->with('retentions')
             ->paginate($invoices_to_page)
@@ -163,6 +165,19 @@ class InvoiceRepository extends Repository
             $message = isset($response->json()['reason']) ? $response->json()['reason'] : ' без причини.';
             $result = ['result' => false , 'message' => $message];
             return $result;
+        }
+    }
+
+    public function countControl()
+    {
+        $this->message = "Увага! По запиту знайдено  {$this->countInvoices}. ";
+        if ($this->countInvoices >= $this->max_invoices_to_view) {
+            $this->message = "Увага! По запиту знайдено {$this->countInvoices} актів виконаних робіт.
+            Для перегляду буде видано тільки <b>{$this->max_invoices_to_view}</b>. Уточніть будь ласка запит.";
+            return false;
+        } else {
+            $this->message = null;
+            return true;
         }
     }
 }

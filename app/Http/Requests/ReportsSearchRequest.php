@@ -55,5 +55,9 @@ class ReportsSearchRequest extends FormRequest
                 ]);
             }
         }
+        $valueSum = $this->get('sum_report');
+        if ($valueSum){
+            $this->merge(['sum_report' => str_replace(',', '.', $valueSum)]);
+        }
     }
 }
