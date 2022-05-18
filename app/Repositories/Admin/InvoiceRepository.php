@@ -91,28 +91,47 @@ class InvoiceRepository extends Repository
         }
 
         $this->countInvoices = $query->count();
+        // якщо розмір колекції перевищує допустимий
+        // до $this->max_invoices_to_view останніх записів
+        // то відберемо в масив id перших елементів в кількості max_invoices_to_view
+        // в подальшому використає даний масив для кінцевого відбору з пагінатором
         if (!$this->countControl()) {
-            // до $this->max_invoices_to_view останніх записів
-            $lastInvoice = $query
-                ->orderBy('id', 'desc')
-                ->skip($this->max_invoices_to_view)
-                ->take(1)
-                ->get();
+            if ($request->hasAny(['months', 'year'])) {
+                // --- якщо це пошук при відборі, то виводим спочатку
+                $arrayId = $query->orderBy('id')
+                    ->take($this->max_invoices_to_view)
+                    ->pluck('id')
+                    ->toArray();
 
-            if ($lastInvoice->count() == 1) {
-                $lastInvoiceID = $lastInvoice[0]->id;
-                $query->where('id', '>', $lastInvoiceID);
+                $invoices = Invoice::whereIn('id', $arrayId)
+                    ->orderBy('date_invoice')->orderBy('kod_atp')
+                    ->with('products')
+                    ->with('retentions')
+                    ->paginate($invoices_to_page)
+                    ->withQueryString();
+
+            }else{ // --- інакше виводимо останні
+                $arrayId = $query->orderBy('id', 'desc')
+                    ->take($this->max_invoices_to_view)
+                    ->pluck('id')
+                    ->toArray();
+
+                $invoices = Invoice::whereIn('id', $arrayId)
+                    ->orderBy('id', 'desc')
+                    ->with('products')
+                    ->with('retentions')
+                    ->paginate($invoices_to_page)
+                    ->withQueryString();
             }
-
         }else{
-            $query->orderBy('id', 'desc');
-
+            $invoices = $query
+                ->orderBy('date_invoice')->orderBy('kod_atp')
+                ->with('products')
+                ->with('retentions')
+                ->paginate($invoices_to_page)
+                ->withQueryString();
         }
-        $invoices = $query
-            ->with('products')
-            ->with('retentions')
-            ->paginate($invoices_to_page)
-            ->withQueryString();
+
 
         return $invoices;
     }

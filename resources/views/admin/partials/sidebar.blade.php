@@ -1,12 +1,12 @@
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="{{ route('home') }}" class="brand-link">
-        <img src="../dist/img/AdminLTELogo.png"
-             alt="AdminLTE Logo"
-             class="brand-image img-circle elevation-3"
-             style="opacity: .8">
-        <span class="brand-text font-weight-light">Partner</span>
+    <a href="{{ route('welcome') }}" class="brand-link">
+        <img src="{{ asset('dist/img/logo.png') }}"
+             alt="PARTNER"
+             class="brand-image-xl ml-3 mr-2 bg-white img-circle"
+        >
+        <span class="brand-text"><b>PARTNER</b></span>
     </a>
 
     <!-- Sidebar -->
