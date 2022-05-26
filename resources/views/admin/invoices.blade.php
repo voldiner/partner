@@ -563,7 +563,7 @@
                     success: function (data) {
                        // $('#alert-valid').addClass('no-display-alert');
 
-                        console.log(data);
+                        //console.log(data);
                         $('#send-messages ul').append('<li>'+ data.message + '</li>');
                         // --- успішне завершення передачі ----- //
                         if (typeof data.success !== "undefined"){

@@ -119,6 +119,8 @@ class InvoiceController extends Controller
                 'monthsFromSelect'
             ))->save($nameFile);
 
+             //sleep(10);
+
              $transfer = $invoiceRepository->sendPdfToPartner($nameFile);
 
              if (!$transfer['result']){

@@ -51,20 +51,22 @@ class UserController extends Controller
         $result = $user->save();
         if ($result){
             Log::channel('edit_users')->debug("Change email {$user->name} to {$user->mail}");
-            return redirect()->route('logout');
+            auth()->logout();
+            return redirect()->route('welcome');
         }
+
         return redirect()->back()->with(['error' => 'Помилка зміни email']);
     }
 
     public function changePassword(ChangeUserPasswordRequest $request)
     {
-        //dd($request->all());
         $user = auth()->user();
         $user->password = bcrypt($request->new_password);
         $result = $user->save();
         if ($result){
             Log::channel('edit_users')->debug("Change password {$user->name}");
-            return redirect()->route('logout');
+            auth()->logout();
+            return redirect()->route('welcome');
         }
         return redirect()->back()->with(['error' => 'Помилка зміни пароля']);
     }

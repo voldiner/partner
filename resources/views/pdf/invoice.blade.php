@@ -168,7 +168,7 @@
 </p>
 <p>В чому і підписали акт: </p>
 
-<div class="pidpisLeft">
+<div class="pidpisRight">
     <p> {{ $invoice->user->full_name }}</p>
     @isset($invoice->user->address)
         <p class="mb-1">{{ $invoice->user->address }}</p>
@@ -193,7 +193,7 @@
     </p>
 </div>
 
-<div class="pidpisRight">
+<div class="pidpisLeft">
     <p>
         Приватне акціонерне товариство "Волинське обласне підприємство
         автобусних станцій"

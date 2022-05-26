@@ -50,6 +50,7 @@ class InvoiceRepository extends Repository
         $this->year = null;
         $this->message = null;
         $this->max_invoices_to_view = null;
+
     }
 
 
@@ -171,7 +172,9 @@ class InvoiceRepository extends Repository
         }
 
         $response = Http::withHeaders([
-            'Authorization' => env('TOKEN_VCHASNO'),
+            //'Authorization' => env('TOKEN_VCHASNO'),
+            'Authorization' => 'Wty3MUVfRj0Q0M43kyKWlB-gOKjSW13924xp',
+
         ])
             ->attach('file', file_get_contents($nameFile), $nameFile)
             ->post('https://vchasno.ua/api/v2/documents');
