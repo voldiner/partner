@@ -101,14 +101,21 @@ class ReportRepository
             // ----- визначим додавати нову відомість чи коректувати стару ------- //
             // todo добавити умову по автостанції (добавив перевірити як працює) якщо відомість видалена на АС
             // todo то як при синхронізації це відобразити - ЗРОБИВ ТЕЖ
-            $report = Report::where([
-                ['kod_flight', '=', $record->get('kr')],
-                ['time_flight', '=', $record->get('vr')],
-                ['day', '=', $record->get('day')],
-                ['month', '=', $record->get('month')],
-                ['year', '=', $record->get('year')],
-                ['kod_ac', '=', $record->get('kod_ac')]
-            ])->first();
+            if ($record->get('vr') == 0){
+                // ручні відомості шукаємо по номеру відомості
+                $report = Report::where([
+                    ['num_report', '=', $record->get('nved')],
+                ])->first();
+            }else{
+                $report = Report::where([
+                    ['kod_flight', '=', $record->get('kr')],
+                    ['time_flight', '=', $record->get('vr')],
+                    ['day', '=', $record->get('day')],
+                    ['month', '=', $record->get('month')],
+                    ['year', '=', $record->get('year')],
+                    ['kod_ac', '=', $record->get('kod_ac')]
+                ])->first();
+            }
 
             if ($report) {
                 if ($record->get('suma') < 0){
@@ -137,7 +144,10 @@ class ReportRepository
 
             $report->save();
 
-            $report->places()->saveMany($places);
+            if (count($places)){
+                $report->places()->saveMany($places);
+            }
+
         }
         $timeWork = time() - $startTime;
         $result = "Processed {$countReportsAll} record. Add {$countReportsAdd} reports. Update {$countReportsUpdate} reports. Delete {$countReportsDelete} reports. Time {$timeWork} sec.";
@@ -209,22 +219,25 @@ class ReportRepository
     protected function getPlacesFromDBF($kod_flight, $time_flight, $nomved, $table, $kod_ac)
     {
         $result = [];
-        $record = $table->moveTo(0);
-        $place = $this->createPlace($record, $kod_flight, $time_flight);
-        if ($place) {
-            $result[] = $place;
-        }
-        while ($record = $table->nextRecord()) {
+        if ($kod_flight > 0 && $time_flight > 0){
+            $record = $table->moveTo(0);
             $place = $this->createPlace($record, $kod_flight, $time_flight);
             if ($place) {
                 $result[] = $place;
             }
+            while ($record = $table->nextRecord()) {
+                $place = $this->createPlace($record, $kod_flight, $time_flight);
+                if ($place) {
+                    $result[] = $place;
+                }
 
+            }
         }
+
         if (count($result) === 0) {
             $this->warnings[] = " Error not found places report #{$nomved} код АС {$kod_ac} код рейсу {$kod_flight} час відправки {$time_flight}";
             //dump(" Error not found places report #{$nomved}");
-            return false;
+            //return false;
         }
         return $result;
     }
@@ -270,8 +283,13 @@ class ReportRepository
             //dump("Error validate kod_ac " . $record->get('kod_ac') . " report #" . $record->get('nved'));
         }
         if ($record->get('vr') <= 0 || $record->get('vr') > 24.00) {
-            $result = false;
+            //$result = false;
             $this->warnings[] = "Error validate vr " . $record->get('vr') . " report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
+            //dump("Error validate vr " . $record->get('vr') . " report #" . $record->get('nved'));
+        }
+        if ($record->get('kr') == 0) {
+            $result = false;
+            $this->warnings[] = "Error validate kr " . $record->get('kr') . " report #" . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
             //dump("Error validate vr " . $record->get('vr') . " report #" . $record->get('nved'));
         }
         // введена вручну відомість може бути без назви рейсу але повіомити треба

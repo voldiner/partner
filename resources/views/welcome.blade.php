@@ -287,15 +287,18 @@
         <div class="col-md-6 offset-md-3 pb-4">
             <a name="help"></a>
             <div id="video12">
-                <iframe width="560" height="315" src="https://www.youtube.com/embed/6F2Pd1RdPPs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/2Hhgszvu1XE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 <div>
-                    <img src="http://img.youtube.com/vi/6F2Pd1RdPPs/0.jpg"
-                         data-src="https://www.youtube.com/embed/6F2Pd1RdPPs"/>
-                    <img src="http://img.youtube.com/vi/tkyBM-LIc5U/0.jpg"
-                         data-src="https://www.youtube.com/embed/tkyBM-LIc5U"/>
-                    <img src="http://img.youtube.com/vi/wS7fYSiPb5E/0.jpg"
-                         data-src="https://www.youtube.com/embed/wS7fYSiPb5E"/>
-
+                    <img src="http://img.youtube.com/vi/2Hhgszvu1XE/0.jpg"
+                         data-src="https://www.youtube.com/embed/2Hhgszvu1XE"/>
+                    <img src="http://img.youtube.com/vi/ncXH1G8m7fc/0.jpg"
+                         data-src="https://www.youtube.com/embed/ncXH1G8m7fc"/>
+                    <img src="http://img.youtube.com/vi/8UlVvhe-FOI/0.jpg"
+                         data-src="https://www.youtube.com/embed/8UlVvhe-FOI"/>
+                    <img src="http://img.youtube.com/vi/SDk7k8ANb98/0.jpg"
+                         data-src="https://www.youtube.com/embed/SDk7k8ANb98"/>
+                    <img src="http://img.youtube.com/vi/4qTOAmGPtDg/0.jpg"
+                         data-src="https://www.youtube.com/embed/4qTOAmGPtDg"/>
                 </div>
             </div>
         </div>

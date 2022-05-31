@@ -110,7 +110,7 @@ class InvoiceController extends Controller
             }
             $date = $invoice->date_invoice->format('Ymd');
             $num = $invoice->number;
-            $nameFile = storage_path("app\send\\03113130_{$kod}_{$date}_АктЗвірки_{$num}_{$email}.pdf");
+            $nameFile = storage_path("app/send/03113130_{$kod}_{$date}_АктЗвірки_{$num}_{$email}.pdf");
             // ---------------
             //throw new \Exception('Testing exception!!!');
 

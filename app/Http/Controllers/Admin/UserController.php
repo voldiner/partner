@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Repositories\Admin\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Storage;
 
 
 class UserController extends Controller
@@ -64,4 +65,6 @@ class UserController extends Controller
         }
         return back();
     }
+
+
 }

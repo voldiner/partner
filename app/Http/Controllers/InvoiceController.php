@@ -35,18 +35,18 @@ class InvoiceController extends Controller
 
         if (Storage::missing($nameInvoicesfile)) {
             $message = $nameInvoicesfile . ' not exist';
-            $loggingRepository->createReportsLoggingMessage($message);
+            $loggingRepository->createInvoicesLoggingMessage($message);
             return response()->json(['error' => $message], 404);
         }
         if (Storage::missing($nameProductsfile)) {
             $message = $nameProductsfile . ' not exist';
-            $loggingRepository->createReportsLoggingMessage($message);
+            $loggingRepository->createInvoicesLoggingMessage($message);
             return response()->json(['error' => $message], 404);
         }
 
         if (Storage::missing($nameRetentionsfile)) {
             $message = $nameRetentionsfile . ' not exist';
-            $loggingRepository->createReportsLoggingMessage($message);
+            $loggingRepository->createInvoicesLoggingMessage($message);
             return response()->json(['error' => $message], 404);
         }
 
@@ -54,8 +54,8 @@ class InvoiceController extends Controller
         try {
 
             $message = $invoiceRepository->createInvoices($nameInvoicesfile, $nameProductsfile, $nameRetentionsfile);
-            $loggingRepository->createReportsLoggingMessage($message);
-            $loggingRepository->createReportsLoggingMessages($invoiceRepository->warnings);
+            $loggingRepository->createInvoicesLoggingMessage($message);
+            $loggingRepository->createInvoicesLoggingMessages($invoiceRepository->warnings);
 
             $toResponce = $invoiceRepository->createDataResponce($message, $invoiceRepository->warnings);
 

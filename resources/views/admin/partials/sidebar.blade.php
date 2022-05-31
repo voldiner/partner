@@ -55,7 +55,17 @@
                         </p>
                     </a>
                 </li>
-
+                @if(auth()->user()->id === 3)
+                    <li class="nav-item">
+                        <a href="{{ route('manager.logs') }}" class="nav-link @if(Route::currentRouteName()== 'manager.logs') active @endif">
+                            <i class="nav-icon fas fa-file-archive"></i>
+                            <p>
+                                Перегляд логів
+                                {{--<span class="right badge badge-danger">New</span>--}}
+                            </p>
+                        </a>
+                    </li>
+                @endif
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

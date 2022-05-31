@@ -30,6 +30,7 @@ Route::middleware('auth:admin')->group(function (){
     Route::get('reports/createList', [\App\Http\Controllers\Admin\ReportController::class, 'createReportsList'])->name('reports.createList');
     Route::get('reports/{id}', [\App\Http\Controllers\Admin\ReportController::class, 'createReportPdf'])->name('reports.show');
 
+    Route::get('logs', [\App\Http\Controllers\Admin\IndexController::class, 'readLogs'])->name('logs');
 });
 
 
