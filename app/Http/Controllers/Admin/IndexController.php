@@ -57,7 +57,7 @@ class IndexController extends Controller
             }else{
                 return redirect()->route('manager.logs')->with(['error' => 'File ' . $request->get('nameLog') . ' not found!']);
             }
-            // todo відбір по даті [2022-05-04 треба   29/05/2022 - є
+            //  відбір по даті 2022-05-04 треба   29/05/2022 - є
             $dateSelection = $this->createDate($request->get('date-day'));
             //dd($dateSelection);
             foreach ($logAll as $line) {

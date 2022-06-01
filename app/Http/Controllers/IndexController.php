@@ -25,6 +25,15 @@ class IndexController extends Controller
         return view('welcome');
     }
 
+    public function termsOfUse()
+    {
+        return view('about');
+    }
+
+    public function privacyPolicy()
+    {
+        return view('privacypolicy');
+    }
 //    public function welcome401()
 //    {
 //        return view('errors.401');

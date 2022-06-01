@@ -15,7 +15,7 @@
             <p class="mb-2">Приймальня: 03322 </p>
             <p class="mb-2">Тех.підтримка: <i class="fas fa-lg fa-phone"></i> +38 099 111 11 11 <i class="fas fa-lg fa-envelope"><b>&nbsp;info@vopas.com.ua</b></i> </p>
             <p class="mb-2"><small>пн-пт з 08:30 - 17:30</small></p>
-            <p class="mb-2"><a href="#help">Допомога</a></p>
+            <p class="mb-2"><a href="{{ route('terms') }}">Правила користування сервісом</a></p>
         </div>
     </div>
 

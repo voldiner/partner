@@ -15,6 +15,9 @@ use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 */
 
 Route::get('/', [\App\Http\Controllers\IndexController::class, 'welcome'])->name('welcome');
+Route::get('terms-of-use', [\App\Http\Controllers\IndexController::class, 'termsOfUse'])->name('terms');
+Route::get('privacypolicy', [\App\Http\Controllers\IndexController::class, 'privacyPolicy'])->name('privacypolicy');
+
 //Route::get('/401', [\App\Http\Controllers\IndexController::class, 'welcome401']);
 
 
