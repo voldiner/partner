@@ -52,7 +52,8 @@
     </style>
 </head>
 <body>
-<div class="row big-row">
+@include('partials.header_start')
+<div class="row big-row pt-3 pb-3">
     <div class="col-sm-10 col-xl-6 offset-xl-3 offset-sm-1">
         <h2>Правила користування сервісом "Електронний кабінет перевізника"</h2>
     </div>
@@ -282,13 +283,13 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-auto font-gray pl-3 ml-3">6.1</div>
+            <div class="col-auto font-gray pl-3 ml-3">6.2</div>
             <div class="col">
                 Правила в новій редакції, як це зазначено в п. 6.1. набирають чинності з моменту розміщення на відповідній сторінці Сервісу.
             </div>
         </div>
         <div class="row">
-            <div class="col-auto font-gray pl-3 ml-3">6.1</div>
+            <div class="col-auto font-gray pl-3 ml-3">6.3</div>
             <div class="col">
                 Оператор має право надсилати Користувачам електронні листи інформаційного характеру,
                 використовуючи при цьому електронні адреси Користувачів, попередньо наданих на законних підставах Користувачами
@@ -298,5 +299,12 @@
     </div>
 </div>
 @include('partials.footer_wide')
+<!-- Вариант 1: пакет jQuery и Bootstrap (включает Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
+        crossorigin="anonymous"></script>
 </body>
 </html>
