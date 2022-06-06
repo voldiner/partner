@@ -40,7 +40,27 @@ class UserController extends Controller
 
     public function update(UserEditRequest $request)
     {
-        dd($request->all());
+        $user = auth()->user();
+
+        $user->full_name = $request->get('full_name');
+        $user->short_name = $request->get('short_name');
+        $user->insurer = $request->get('insurer');
+        $user->surname = $request->get('surname');
+        $user->identifier = $request->get('identifier');
+        $user->address = $request->get('address');
+        $user->is_pdv = $request->get('is_pdv') === 'checked' ? 1 : 0;
+        $user->certificate = $request->get('certificate');
+        $user->certificate_tax = $request->get('certificate_tax');
+        $user->telephone = $request->get('telephone');
+        $user->edrpou = $request->get('edrpou');
+
+        $result = $user->save();
+        if ($result){
+            Log::channel('edit_users')->debug("Change fields {$user->name} success");
+            return back()->with(['success' => 'Реквізити успішно оновлено']);
+        }
+
+        return redirect()->back()->with(['error' => 'Помилка зміни реквізитів']);
     }
 
     public function changeEmail(ChangeUserEmailRequest $request)
