@@ -23,8 +23,11 @@ Route::middleware('auth:admin')->group(function (){
     Route::get('/', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('index');
     Route::post('/', [\App\Http\Controllers\Admin\UserController::class, 'setCarrier'])->name('set_carrier');
     // -- invoices
+    Route::get('invoices/summary', [\App\Http\Controllers\Admin\InvoiceController::class, 'summary'])->name('invoices.summary');
+    Route::post('invoices/summary', [\App\Http\Controllers\Admin\InvoiceController::class, 'createTableSummary'])->name('invoices.createSummary');
     Route::get('invoices', [\App\Http\Controllers\Admin\InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('invoices/{id}', [\App\Http\Controllers\Admin\InvoiceController::class, 'createInvoicePdf'])->name('invoices.show');
+
     // ---  reports
     Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/createList', [\App\Http\Controllers\Admin\ReportController::class, 'createReportsList'])->name('reports.createList');

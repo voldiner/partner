@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class InvoicesSearchRequest extends FormRequest
+class InvoicesSearchSummary extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,12 +25,13 @@ class InvoicesSearchRequest extends FormRequest
     public function rules()
     {
         return [
-            'months' => 'array',
-            'months.*' => [
+
+            'month' => [
+                'required',
                 'integer',
                 Rule::in([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
             ],
-            'year' => 'nullable|integer'
+            'year' => 'required|integer'
         ];
     }
 

@@ -271,7 +271,7 @@ class InvoiceRepository
             $result = new Retention([
                 'num_invoice' => $record->get('invoice'),
                 'sum' => $record->get('suma'),
-                'name' => $record->get('name'),
+                'name' => str_replace(['i','I'], ['і', 'І'],$record->get('name'))
             ]);
             return $result;
         } else {

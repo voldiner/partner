@@ -11,14 +11,10 @@ namespace App\Repositories\Admin;
 
 use App\Http\Requests\InvoicesSearchRequest;
 use App\Models\Invoice;
-use App\Models\Product;
-use App\Models\Retention;
 use Illuminate\Support\Facades\Http;
 use XBase\TableReader;
 use App\Models\Station;
 use App\Models\User;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Collection;
 use \App\Repositories\InvoiceRepository as Repository;
 
 class InvoiceRepository extends Repository
@@ -43,9 +39,9 @@ class InvoiceRepository extends Repository
             7 => 'липень',
             8 => 'серпень',
             9 => 'вересень',
-           10 => 'жовтень',
-           11 => 'листопад',
-           12 => 'грудень',
+            10 => 'жовтень',
+            11 => 'листопад',
+            12 => 'грудень',
         ];
         $this->year = null;
         $this->message = null;
@@ -70,15 +66,15 @@ class InvoiceRepository extends Repository
                 $conditionsAnd[] = ['year', '=', $request->get('year')];
             }
 
-            if ($request->session()->has('atpId') && session('atpId') != 0){
+            if ($request->session()->has('atpId') && session('atpId') != 0) {
                 $conditionsAnd[] = ['user_id', '=', session('atpId')];
             }
 
             $query->where($conditionsAnd);
             // ----------- OR statement ------------------------- //
             if ($request->has('months')) {
-                foreach ($this->monthsFromSelect as $key => $month){
-                    if (in_array($key, $request->get('months') ) ){
+                foreach ($this->monthsFromSelect as $key => $month) {
+                    if (in_array($key, $request->get('months'))) {
                         $this->monthsSelected[$key] = $month;
                     }
                 }
@@ -111,7 +107,7 @@ class InvoiceRepository extends Repository
                     ->paginate($invoices_to_page)
                     ->withQueryString();
 
-            }else{ // --- інакше виводимо останні
+            } else { // --- інакше виводимо останні
                 $arrayId = $query->orderBy('id', 'desc')
                     ->take($this->max_invoices_to_view)
                     ->pluck('id')
@@ -124,7 +120,7 @@ class InvoiceRepository extends Repository
                     ->paginate($invoices_to_page)
                     ->withQueryString();
             }
-        }else{
+        } else {
             $invoices = $query
                 ->orderBy('date_invoice')->orderBy('kod_atp')
                 ->with('products')
@@ -140,8 +136,8 @@ class InvoiceRepository extends Repository
     public function getUsersToSelect()
     {
         $users = User::where('user_type', '=', 1)
-            ->pluck('id','short_name');
-        $users->prepend(0,'не вказано' );
+            ->pluck('id', 'short_name');
+        $users->prepend(0, 'не вказано');
         return $users;
     }
 
@@ -154,10 +150,10 @@ class InvoiceRepository extends Repository
     public function getUserCode($edrpou, $identifier)
     {
         $kod = null;
-        if (!empty($edrpou)){
+        if (!empty($edrpou)) {
             $kod = $edrpou;
-        }else{
-            if (!empty($identifier)){
+        } else {
+            if (!empty($identifier)) {
                 $kod = $identifier;
             }
         }
@@ -166,8 +162,8 @@ class InvoiceRepository extends Repository
 
     public function sendPdfToPartner($nameFile)
     {
-        if (!file_exists($nameFile)){
-            $result = ['result' => false , 'message' => 'Відсутній файл' . $nameFile];
+        if (!file_exists($nameFile)) {
+            $result = ['result' => false, 'message' => 'Відсутній файл' . $nameFile];
             return $result;
         }
 
@@ -179,13 +175,13 @@ class InvoiceRepository extends Repository
             ->attach('file', file_get_contents($nameFile), $nameFile)
             ->post('https://vchasno.ua/api/v2/documents');
 
-        if ($response->status() === 201){
-            $message = 'Успішна передача ' . isset($response->json()['documents'][0]['id']) ? $response->json()['documents'][0]['id'] :  'no ID';
-            $result = ['result' => true , 'message' => $message];
+        if ($response->status() === 201) {
+            $message = 'Успішна передача ' . isset($response->json()['documents'][0]['id']) ? $response->json()['documents'][0]['id'] : 'no ID';
+            $result = ['result' => true, 'message' => $message];
             return $result;
-        }else{
+        } else {
             $message = isset($response->json()['reason']) ? $response->json()['reason'] : ' без причини.';
-            $result = ['result' => false , 'message' => $message];
+            $result = ['result' => false, 'message' => $message];
             return $result;
         }
     }
@@ -201,5 +197,114 @@ class InvoiceRepository extends Repository
             $this->message = null;
             return true;
         }
+    }
+
+    /**
+     * @param $month integer
+     * @param $year integer
+     * @return array
+     */
+    public function getInvoicesForSummary($month, $year)
+    {
+        $invoices = Invoice::where('month', '=', $month)
+            ->where('year', '=', $year)
+            ->with(['products', 'retentions', 'user'])
+            ->orderBy('kod_atp')
+            ->get();
+        $dateCreate = date("m.d.Y G:i:s");
+        $result[] = ["Оборотна відомість за {$this->monthsFromSelect[$month]} місяць {$year} року (надруковано {$dateCreate})"];
+        $result[] = [
+            'код',
+            'назва',
+            'залишок на початок дебет',
+            'залишок на початок кредит',
+            'сума реалізації',
+            'сума багажу',
+            'сума страховий збір',
+            'відрахування від виручки',
+            'відрахування від страхового збору',
+            'відрахування від багажу',
+            'сума до перерахування',
+            'перераховано за місяць',
+            'утримано по угоді',
+            'утримано за квитки',
+            'утримано ПДВ',
+            'утримано за кімнату відпочинку',
+            'утримано по акту',
+            'видано з каси',
+            'утримано за інкасацію',
+            'залишок на кінець дебет',
+            'залишок на кінець кредит',
+        ];
+        $counter = 2;
+        foreach ($invoices as $invoice) {
+            $result[$counter] = [$invoice->kod_atp];
+            array_push($result[$counter], $invoice->user->short_name);
+            if ($invoice->balance_begin > 0) {
+                array_push($result[$counter], 0, $invoice->balance_begin);
+            } elseif ($invoice->balance_begin < 0) {
+                array_push($result[$counter], $invoice->balance_begin * -1, 0);
+            } else {
+                array_push($result[$counter], 0, 0);
+            }
+            $sumTariff = 0;
+            $sumBaggage = 0;
+            $sumInsurance = 0;
+            foreach ($invoice->products as $product) {
+                $sumTariff += $product->sum_tariff;
+                $sumBaggage += $product->sum_baggage;
+                $sumInsurance += $product->sum_insurance;
+            }
+            array_push($result[$counter], $sumTariff, $sumBaggage, $sumInsurance);
+            array_push($result[$counter],
+                $invoice->calculation_for_billing,
+                0,
+                $invoice->calculation_for_baggage,
+                $invoice->sum_for_transfer,
+                $invoice->sum_month_transfer
+                );
+            // утримано по угоді
+            $sumUg = 0;
+            // утримано за квитки
+            $sumTic = 0;
+            // утримано ПДВ
+            $sumPDV = 0;
+            // утримано за кімнату відпочинку
+            $sumKim = 0;
+            // утримано по акту
+            $sumAkt = 0;
+            foreach ($invoice->retentions as $retention){
+                if ($retention->name == 'Утримано згiдно угоди'){
+                    $sumUg += $retention->sum;
+                }elseif ($retention->name == 'Утримано за квитки'){
+                    $sumTic += $retention->sum;
+                }elseif ($retention->name == 'Утримано ПДВ'){
+                    $sumPDV += $retention->sum;
+                }elseif ($retention->name == 'Утримано за кімнату відпочинку'){
+                    $sumKim += $retention->sum;
+                }elseif ($retention->name == 'Утримано згідно актів контролю'){
+                    $sumAkt += $retention->sum;
+                }
+            }
+            array_push($result[$counter],
+                $sumUg,
+                $sumTic,
+                $sumPDV,
+                $sumKim,
+                $sumAkt,
+                $invoice->get_cash,
+                $invoice->retention_for_collection
+                );
+            if ($invoice->balance_end > 0) {
+                array_push($result[$counter], 0, $invoice->balance_end);
+            } elseif ($invoice->balance_end < 0) {
+                array_push($result[$counter], $invoice->balance_end * -1, 0);
+            } else {
+                array_push($result[$counter], 0, 0);
+            }
+
+            $counter++;
+        }
+        return count($result)>2 ? $result : [];
     }
 }

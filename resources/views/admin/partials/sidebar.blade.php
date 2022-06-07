@@ -23,8 +23,7 @@
 
         <!-- Sidebar Menu -->
         <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                data-accordion="false">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                 <!-- Add icons to the links using the .nav-icon class
                      with font-awesome or any other icon font library -->
 
@@ -46,14 +45,27 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ route('manager.invoices.index') }}" class="nav-link @if(Route::currentRouteName()== 'manager.invoices.index') active @endif">
+
+                <li class="nav-item has-treeview @if(Route::currentRouteName()== 'manager.invoices.index' || Route::currentRouteName()== 'manager.invoices.summary') menu-open @endif">
+                    <a href="#" class="nav-link @if(Route::currentRouteName()== 'manager.invoices.index' || Route::currentRouteName()== 'manager.invoices.summary') active @endif">
                         <i class="nav-icon fas fa-people-arrows"></i>
                         <p>
-                            Акти виконаних робіт
-                            {{--<span class="right badge badge-danger">New</span>--}}
+                            Акти
+                            <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
+                    <ul class="nav nav-treeview" style="@if(Route::currentRouteName()== 'manager.invoices.index' || Route::currentRouteName()== 'manager.invoices.summary') display: block; @else display: none; @endif ">
+                        <li class="nav-item">
+                            <a href="{{ route('manager.invoices.index') }}" class="nav-link @if(Route::currentRouteName()== 'manager.invoices.index') active @endif">
+                                <p class="ml-4">Перегляд</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('manager.invoices.summary') }}" class="nav-link @if(Route::currentRouteName()== 'manager.invoices.summary') active @endif">
+                                <p class="ml-4">Оборотна відомість</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 @if(auth()->user()->id === 3)
                     <li class="nav-item">

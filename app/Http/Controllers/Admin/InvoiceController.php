@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\InvoicesExport;
 use App\Http\Requests\InvoicesSearchRequest;
+use App\Http\Requests\InvoicesSearchSummary;
 use App\Models\Invoice;
 use App\Repositories\LoggingRepository;
 use Carbon\Carbon;
@@ -14,13 +16,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InvoiceController extends Controller
 {
 
     public function index(InvoicesSearchRequest $request, InvoiceRepository $invoiceRepository)
     {
-
         $invoices = $invoiceRepository->getInvoicesFromQuery($request);
 
         $countInvoices = $invoiceRepository->countInvoices;
@@ -145,5 +147,40 @@ class InvoiceController extends Controller
         $result['counter'] = $invoice->counter_sending;
         $loggingRepository->createSendInvoicesLoggingMessage($result['message']);
         return response()->json($result, 200);
+    }
+
+    public function summary(InvoiceRepository $invoiceRepository)
+    {
+        $monthsFromSelect = $invoiceRepository->monthsFromSelect;
+        $users = $invoiceRepository->getUsersToSelect();
+        $message = $invoiceRepository->message;
+
+        $monthsSelected = [];
+        $year = null;
+
+        return view('admin.invoices_summary',compact
+        (
+            'monthsFromSelect',
+            'monthsSelected',
+            'year',
+            'users',
+            'message'
+        ));
+    }
+
+    public function createTableSummary(InvoicesSearchSummary $request, InvoiceRepository $invoiceRepository)
+    {
+
+        $invoices = $invoiceRepository->getInvoicesForSummary($request->month, $request->year);
+
+        if (count($invoices)){
+
+            return Excel::download(new InvoicesExport($invoices), 'invoices.xlsx');
+
+        }else{
+            return back()->with(['error' => "Актів за {$invoiceRepository->monthsFromSelect[$request->month]} {$request->year} не знайдено" ]);
+        }
+
+
     }
 }
