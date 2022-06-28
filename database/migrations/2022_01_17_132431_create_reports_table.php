@@ -20,7 +20,7 @@ class CreateReportsTable extends Migration
             $table->string('num_report')->comment('номер відомості');
             $table->integer('kod_flight')->comment('код рейсу');
             $table->string('name_flight')->comment('назва рейсу');
-            $table->decimal('time_flight',4,2)->comment('час відправки рейсу');
+            $table->decimal('time_flight',4,2)->default(0.0)->comment('час відправки рейсу');
             $table->date('date_flight',4,2)->comment('дата рейсу');
             $table->decimal('sum_tariff',12,2)->nullable()->comment('сума тариф');
             $table->decimal('sum_baggage',12,2)->nullable()->comment('сума багаж');

@@ -147,13 +147,13 @@ class InvoiceRepository
         if (!is_numeric($record->get('atp')) || $record->get('atp') == 0) {
             $this->warnings[] = " Error validate atp " . $record->get('atp') . " invoice #" . $record->get('number');
             $result = false;
-            dump("Error validate atp " . $record->get('atp') . " invoice #" . $record->get('number'));
+           // dump("Error validate atp " . $record->get('atp') . " invoice #" . $record->get('number'));
         }
 
         if (!$this->validateDMY(1, $record->get('mis'), $record->get('rik'))) {
             $result = false;
             $this->warnings[] = "Error validate month, year  invoice #" . $record->get('number');
-            dump("Error validate month, year  invoice #" . $record->get('number'));
+           // dump("Error validate month, year  invoice #" . $record->get('number'));
         }
         return $result;
     }
@@ -198,7 +198,7 @@ class InvoiceRepository
         } else {
             $result = 0;
             $this->warnings[] = 'Error not found user_id ' . $record->get('atp') . ' invoice #' . $record->get('number');
-            dump(" Error not found user_id " . $record->get('atp') . " invoice #" . $record->get('number'));
+           // dump(" Error not found user_id " . $record->get('atp') . " invoice #" . $record->get('number'));
         }
         return $result;
     }
@@ -219,7 +219,7 @@ class InvoiceRepository
         }
         if (count($result) === 0) {
             $this->warnings[] = " Error not found products invoice #{$numInvoice} ";
-            dump(" Error not found products invoice #{$numInvoice}");
+           // dump(" Error not found products invoice #{$numInvoice}");
             return $result;
         }
         return $result;
@@ -290,7 +290,7 @@ class InvoiceRepository
         if (!$station) {
             $station = $this->stations->firstWhere('kod', '=', 99);
             $this->warnings[] = "Error not found station_id " . $record->get('kod_ac') . " invoice #" . $record->get('invoice');
-            dump("Error not found station_id " . $record->get('kod_ac') . " invoice #" . $record->get('invoice'));
+           // dump("Error not found station_id " . $record->get('kod_ac') . " invoice #" . $record->get('invoice'));
         }
         return $station;
     }

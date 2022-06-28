@@ -93,6 +93,7 @@ class ReportRepository
             if (!$station) {
                 continue;
             }
+
             $places = $this->getPlacesFromDBF($record->get('kr'), $record->get('vr'), $record->get('nved'), $tablePlaces, $record->get('kod_ac'));
             // --- введена ручна відомість може бути без пасажирів
             //if (!$places) {
@@ -318,6 +319,9 @@ class ReportRepository
         $report->num_report = $record->get('nved');
         $report->name_flight = $record->get('name_r');
         $report->time_flight = $record->get('vr');
+        if ($report->time_flight === null){
+            $report->time_flight = 0.0;
+        }
         $report->kod_flight = $record->get('kr');
         $report->date_flight = $record->get('year') . '-' . $record->get('month') . '-' . $record->get('day');
         $report->sum_tariff = $record->get('suma');

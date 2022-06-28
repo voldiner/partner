@@ -2,7 +2,6 @@
 
 
 namespace App\Actions;
-use App\Models\Invoice;
 use Maatwebsite\Excel\Concerns\FromArray;
 
 
@@ -17,9 +16,7 @@ class InvoicesExport implements FromArray
 
     public function array(): array
     {
-
         return $this->invoices;
-        //return Invoice::all();
     }
 
 

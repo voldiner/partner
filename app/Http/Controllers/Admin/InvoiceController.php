@@ -14,8 +14,6 @@ use App\Repositories\Admin\InvoiceRepository;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class InvoiceController extends Controller
@@ -175,7 +173,7 @@ class InvoiceController extends Controller
 
         if (count($invoices)){
 
-            return Excel::download(new InvoicesExport($invoices), 'invoices.xlsx');
+            return Excel::download(new InvoicesExport($invoices), 'invoices.xls', \Maatwebsite\Excel\Excel::XLS);
 
         }else{
             return back()->with(['error' => "Актів за {$invoiceRepository->monthsFromSelect[$request->month]} {$request->year} не знайдено" ]);

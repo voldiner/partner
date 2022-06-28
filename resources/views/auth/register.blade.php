@@ -69,7 +69,7 @@
                         <div class="icheck-primary mb-3">
                             <input type="checkbox" id="agreeTerms" name="terms" value="agree">
                             <label for="agreeTerms">
-                                Я погоджуюсь з <a href="#">правилами використання</a>
+                                Я погоджуюсь з <a href="{{ route('terms') }}">правилами використання</a>
                             </label>
                         </div>
                     </div>

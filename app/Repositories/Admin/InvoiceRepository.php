@@ -212,31 +212,8 @@ class InvoiceRepository extends Repository
             ->orderBy('kod_atp')
             ->get();
         $dateCreate = date("m.d.Y G:i:s");
-        $result[] = ["Оборотна відомість за {$this->monthsFromSelect[$month]} місяць {$year} року (надруковано {$dateCreate})"];
-        $result[] = [
-            'код',
-            'назва',
-            'залишок на початок дебет',
-            'залишок на початок кредит',
-            'сума реалізації',
-            'сума багажу',
-            'сума страховий збір',
-            'відрахування від виручки',
-            'відрахування від страхового збору',
-            'відрахування від багажу',
-            'сума до перерахування',
-            'перераховано за місяць',
-            'утримано по угоді',
-            'утримано за квитки',
-            'утримано ПДВ',
-            'утримано за кімнату відпочинку',
-            'утримано по акту',
-            'видано з каси',
-            'утримано за інкасацію',
-            'залишок на кінець дебет',
-            'залишок на кінець кредит',
-        ];
-        $counter = 2;
+        $counter = 0;
+        $result = [];
         foreach ($invoices as $invoice) {
             $result[$counter] = [$invoice->kod_atp];
             array_push($result[$counter], $invoice->user->short_name);
@@ -255,14 +232,6 @@ class InvoiceRepository extends Repository
                 $sumBaggage += $product->sum_baggage;
                 $sumInsurance += $product->sum_insurance;
             }
-            array_push($result[$counter], $sumTariff, $sumBaggage, $sumInsurance);
-            array_push($result[$counter],
-                $invoice->calculation_for_billing,
-                0,
-                $invoice->calculation_for_baggage,
-                $invoice->sum_for_transfer,
-                $invoice->sum_month_transfer
-                );
             // утримано по угоді
             $sumUg = 0;
             // утримано за квитки
@@ -273,20 +242,31 @@ class InvoiceRepository extends Repository
             $sumKim = 0;
             // утримано по акту
             $sumAkt = 0;
-            foreach ($invoice->retentions as $retention){
-                if ($retention->name == 'Утримано згiдно угоди'){
+            // Дорахування від обов"язкового страхуванн
+            $sumStr = 0;
+            foreach ($invoice->retentions as $retention) {
+                if ($retention->name == 'Утримано згідно угоди') {
                     $sumUg += $retention->sum;
-                }elseif ($retention->name == 'Утримано за квитки'){
+                } elseif ($retention->name == 'Утримано за квитки') {
                     $sumTic += $retention->sum;
-                }elseif ($retention->name == 'Утримано ПДВ'){
+                } elseif ($retention->name == 'Утримано ПДВ') {
                     $sumPDV += $retention->sum;
-                }elseif ($retention->name == 'Утримано за кімнату відпочинку'){
+                } elseif ($retention->name == 'Утримано за кімнату відпочинку') {
                     $sumKim += $retention->sum;
-                }elseif ($retention->name == 'Утримано згідно актів контролю'){
+                } elseif ($retention->name == 'Утримано згідно актів контролю') {
                     $sumAkt += $retention->sum;
+                }elseif ($retention->name == 'Дорахування від обов"язкового страхуванн') {
+                    $sumStr += $retention->sum;
                 }
             }
+
+            array_push($result[$counter], $sumTariff, $sumBaggage, $sumInsurance);
             array_push($result[$counter],
+                $invoice->calculation_for_billing,
+                $sumStr,
+                $invoice->calculation_for_baggage,
+                $invoice->sum_for_transfer,
+                $invoice->sum_month_transfer,
                 $sumUg,
                 $sumTic,
                 $sumPDV,
@@ -294,7 +274,8 @@ class InvoiceRepository extends Repository
                 $sumAkt,
                 $invoice->get_cash,
                 $invoice->retention_for_collection
-                );
+            );
+
             if ($invoice->balance_end > 0) {
                 array_push($result[$counter], 0, $invoice->balance_end);
             } elseif ($invoice->balance_end < 0) {
@@ -305,6 +286,47 @@ class InvoiceRepository extends Repository
 
             $counter++;
         }
-        return count($result)>2 ? $result : [];
+
+        if (count($result)) {
+            $total = [0, 0];
+            $countColumn = count($result[0]);
+            for ($i = 2; $i < $countColumn; $i++) {
+                $totalSum = 0;
+                foreach ($result as $item) {
+
+                    $totalSum += $item[$i];
+                }
+                array_push($total, $totalSum);
+            }
+            array_push($result, $total);
+            array_unshift($result,
+                [
+                    'код',
+                    'назва',
+                    'залишок на початок дебет',
+                    'залишок на початок кредит',
+                    'сума реалізації',
+                    'сума багажу',
+                    'сума страховий збір',
+                    'відрахування від виручки',
+                    'відрахування від страхового збору',
+                    'відрахування від багажу',
+                    'сума до перерахування',
+                    'перераховано за місяць',
+                    'утримано по угоді',
+                    'утримано за квитки',
+                    'утримано ПДВ',
+                    'утримано за кімнату відпочинку',
+                    'утримано по акту',
+                    'видано з каси',
+                    'утримано за інкасацію',
+                    'залишок на кінець дебет',
+                    'залишок на кінець кредит',
+                ]
+            );
+            array_unshift($result, ["Оборотна відомість за {$this->monthsFromSelect[$month]} місяць {$year} року (надруковано {$dateCreate})"]);
+            return $result;
+        }
+        return [];
     }
 }
