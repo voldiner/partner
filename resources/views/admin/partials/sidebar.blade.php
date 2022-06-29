@@ -67,6 +67,15 @@
                         </li>
                     </ul>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('manager.chat') }}" class="nav-link @if(Route::currentRouteName()== 'manager.chat') active @endif">
+                        <i class="nav-icon fas fa-comments"></i>
+                        <p>
+                            Чат
+                            {{--<span class="right badge badge-danger">New</span>--}}
+                        </p>
+                    </a>
+                </li>
                 @if(auth()->user()->id === 3)
                     <li class="nav-item">
                         <a href="{{ route('manager.logs') }}" class="nav-link @if(Route::currentRouteName()== 'manager.logs') active @endif">
