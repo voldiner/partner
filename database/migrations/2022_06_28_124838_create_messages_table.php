@@ -17,6 +17,7 @@ class CreateMessagesTable extends Migration
             $table->id();
             $table->bigInteger('user_id');
             $table->bigInteger('administrator_id');
+            $table->bigInteger('from');
             $table->text('text');
             $table->timestamps();
         });

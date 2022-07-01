@@ -50,6 +50,7 @@ class UserController extends Controller
         if ($request->atp == 0){
             session(['atpId' => $request->atp]);
             session()->forget('atpName');
+            session()->forget('atpChannel');
             return back();
         }
         $atp = User::find($request->atp);
@@ -59,7 +60,8 @@ class UserController extends Controller
 
         session(['atpId' => $atp->id]);
         session(['atpName' => $atp->full_name]);
-        //dd(url()->previous());
+        session(['atpChannel' => $atp->password_fxp]);
+
         if ($request->has('carrier')){
             return redirect(route('manager.index'));
         }

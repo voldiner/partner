@@ -9,7 +9,7 @@ use Carbon\Carbon;
 
 class IndexController extends Controller
 {
-    public function index()
+   /* public function index()
     {
         $users = User::where('user_type', '=', 1)->pluck('id', 'short_name');
         $users->put('не вказано', 0);
@@ -20,7 +20,7 @@ class IndexController extends Controller
 
     public function setCarrier(Request $request)
     {
-
+        dd(1);
         $request->validate([
             'atp' => 'required|integer',
         ]);
@@ -28,6 +28,8 @@ class IndexController extends Controller
         if ($request->atp == 0) {
             session(['atpId' => $request->atp]);
             session()->forget('atpName');
+            session()->forget('atpChannel');
+
             return back();
         }
 
@@ -39,9 +41,10 @@ class IndexController extends Controller
 
         session(['atpId' => $atp->id]);
         session(['atpName' => $atp->full_name]);
+        session(['atpChannel' => $atp->password_fxp]);
 
         return back();
-    }
+    }*/
 
     public function readLogs(Request $request)
     {

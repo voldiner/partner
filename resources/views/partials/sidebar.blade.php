@@ -73,6 +73,15 @@
                         </p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('chat') }}" class="nav-link @if(Route::currentRouteName()== 'chat') active @endif">
+                        <i class="nav-icon fas fa-comments"></i>
+                        <p>
+                            Чат
+                            {{--<span class="right badge badge-danger">New</span>--}}
+                        </p>
+                    </a>
+                </li>
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

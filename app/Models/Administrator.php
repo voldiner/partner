@@ -27,4 +27,15 @@ class Administrator extends Authenticatable
         'password',
 
     ];
+
+    public function shortName()
+    {
+        $separator = explode(' ', $this->name);
+        $counter = count($separator);
+        $result = '';
+        for ($i = 0; $i < $counter; $i++) {
+            $result .= $i === 0 ? $separator[$i] : ' ' . mb_substr($separator[$i], 0, 1) . '.';
+        }
+        return $result;
+    }
 }

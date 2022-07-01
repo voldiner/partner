@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Administrator;
 use App\Models\Message;
 use App\Models\User;
@@ -14,24 +13,16 @@ class MessageController extends Controller
 {
     public function index()
     {
-        $users = User::where('user_type', '=', 1)->pluck('id', 'short_name');
-        $users->put('не вказано', 0);
         $messages = null;
-        if (session()->has('atpId')) {
-            $counter = Message::where('user_id', '=', session('atpId'))->count();
-            $messages = Message::where('user_id', '=', session('atpId'))
-                ->skip($counter - 30)
-                ->take(30)
-                ->get();
-        }
 
+        $counter = Message::where('user_id', '=', auth()->user()->id)->count();
+        $messages = Message::where('user_id', '=',  auth()->user()->id)
+            ->skip($counter - 30)
+            ->take(30)
+            ->get();
 
-
-        return view('admin.chat', compact(
-            [
-                'users',
+        return view('chat', compact(
                 'messages'
-            ]
         ));
     }
 
@@ -40,7 +31,7 @@ class MessageController extends Controller
         $rules = [
             'message' => 'required|string|max:300',
             'user_id' => 'required|integer|exists:users,id',
-            'administrator_id' => 'required|integer|exists:administrators,id',
+            'administrator_id' => 'required|in:0',
         ];
         $validator = Validator::make($request->all(), $rules);
 
@@ -52,7 +43,7 @@ class MessageController extends Controller
             'text' => $request->get('message'),
             'user_id' => $request->get('user_id'),
             'administrator_id' => $request->get('administrator_id'),
-            'from' => $request->get('administrator_id')
+            'from' => $request->get('user_id')
         ]);
 
         if (!$message) {
@@ -60,7 +51,6 @@ class MessageController extends Controller
         }
         $user = User::find($request->get('user_id'));
         $event = $user->password_fxp;
-        $administrator = Administrator::find($request->get('administrator_id'));
 
         $pusher = new Pusher(
             env('PUSHER_APP_KEY'), //APP KEY
@@ -74,9 +64,8 @@ class MessageController extends Controller
             'message' => htmlspecialchars($request->get('message')),
             'user_id' => $request->get('user_id'),
             'administrator_id' => $request->get('administrator_id'),
-            'from' => $request->get('administrator_id'),
+            'from' => $request->get('user_id'),
             'user_name' => $user->short_name,
-            'administrator_name' => $administrator->shortName(),
             'date' => $message->getDateMessage()
 
         ));
@@ -84,6 +73,5 @@ class MessageController extends Controller
         return response()->json($request->all(), 200);
 
     }
-
 
 }

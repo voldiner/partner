@@ -1,4 +1,4 @@
-@extends('admin.layouts.layout')
+@extends('layouts.layout')
 @section('title', 'Чат')
 @section('meta')
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -21,8 +21,8 @@
 @section('content')
     <!-- Site wrapper -->
     <div class="wrapper">
-    @include('admin.partials.navbar')
-    @include('admin.partials.sidebar')
+    @include('partials.navbar')
+    @include('partials.sidebar')
     <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
 
@@ -59,20 +59,12 @@
                     </div>
                     <div class="row">
                         <div class="col-xl-6 col-lg-8 col-md-10">
-                            <div class="card direct-chat direct-chat-primary">
+                            <div class="card direct-chat direct-chat-primary" id="direct-chat">
                                 <div class="card-header ui-sortable-handle">
-                                    <h3 class="card-title">
-                                        @if(session()->has('atpName'))
-                                            Чат з {{ session('atpName') }}
-                                        @else
-                                            Щоб почати чат, оберіть перевізника
-                                        @endif
-                                    </h3>
+                                    <h5 class="card-title" id="chat-title">
+                                            Ваше повідомлення отримають працівники ПрАТ "ВОПАС"
+                                    </h5>
 
-                                    {{--<div class="card-tools">--}}
-                                        {{--<span data-toggle="tooltip" title="3 New Messages"--}}
-                                              {{--class="badge badge-primary">3</span>--}}
-                                    {{--</div>--}}
                                 </div>
                                 <!-- /.card-header -->
                                 <div class="card-body">
@@ -80,11 +72,11 @@
                                     <div class="direct-chat-messages" id="direct-chat-messages">
                                     @if($messages)
                                         @foreach($messages as $message)
-                                            @if($message->from === $message->user_id)
+                                            @if($message->from === $message->administrator_id)
                                                 <!-- Message. Default to the left -->
                                                     <div class="direct-chat-msg">
                                                         <div class="direct-chat-infos clearfix">
-                                                            <span class="direct-chat-name float-left">{{ $message->user->name }}</span>
+                                                            <span class="direct-chat-name float-left">{{ $message->administrator->shortName() }}</span>
                                                             <span class="direct-chat-timestamp float-left ml-2">{{ $message->getDateMessage() }}</span>
                                                         </div>
                                                         <!-- /.direct-chat-infos -->
@@ -95,12 +87,12 @@
                                                     </div>
                                                     <!-- /.direct-chat-msg -->
                                             @endif
-                                            @if($message->from === $message->administrator_id)
-                                                    <!-- Message to the right -->
+                                            @if($message->from === $message->user_id)
+                                                <!-- Message to the right -->
                                                     <div class="direct-chat-msg right">
                                                         <div class="direct-chat-infos clearfix">
                                                             <span class="direct-chat-timestamp float-right ml-2">{{ $message->getDateMessage() }}</span>
-                                                            <span class="direct-chat-name float-right">{{ $message->administrator->shortName() }}</span>
+                                                            <span class="direct-chat-name float-right">{{ $message->user->name }}</span>
                                                         </div>
                                                         <!-- /.direct-chat-infos -->
                                                         <div class="direct-chat-text ml-5 mr-0">
@@ -109,22 +101,24 @@
                                                         <!-- /.direct-chat-text -->
                                                     </div>
                                                     <!-- /.direct-chat-msg -->
-                                            @endif
-                                        @endforeach
-                                    @endif
+                                                @endif
+                                            @endforeach
+                                        @endif
                                     </div>
-                                    <!--/.direct-chat-messages-->
                                 </div>
                                 <!-- /.card-body -->
                                 <div class="card-footer">
                                     <form id="send-message" action="#" method="post">
                                         <div class="input-group">
 
-                                            <textarea name="message" id="message"  rows="2" placeholder="Ваше повідомлення ..." maxlength="300" style="width: 100%;"></textarea>
+                                            <textarea name="message" id="message" rows="2"
+                                                      placeholder="Ваше повідомлення ..." maxlength="300"
+                                                      style="width: 100%;"></textarea>
                                             <div class="row" style="width: 100%;">
                                                 <div class="col p-0">
                                                      <span class="input-group-append mt-2">
-                                                         <button type="button" id="btn-submit" class="btn btn-primary ml-auto">Відправити</button>
+                                                         <button type="button" id="btn-submit"
+                                                                 class="btn btn-primary ml-auto">Відправити</button>
                                                     </span>
                                                 </div>
                                             </div>
@@ -162,7 +156,16 @@
         jQuery(function ($) {
 
             //Initialize Select2 Elements
-            $('.select2').select2();
+            //  $('.select2').select2();
+
+            // ---- вибір менеджера
+            $('.contacts-list-info').click(function (event) {
+                let title = 'Чат з ' + this.children[0].firstChild.data;
+                console.log($(this).data('id'));
+                $('#chat-title').html(title);
+                $('#direct-chat').removeClass('direct-chat-contacts-open');
+            });
+
 
             // do not send form on key press ENTER
             $('#send-message').keydown(function (event) {
@@ -182,15 +185,15 @@
 
             var channel = pusher.subscribe("partner");
 
-            channel.bind("{{ session()->has('atpChannel')? session('atpChannel') : 'NoChannel' }}", (data) => {
+            channel.bind("{{ auth()->user()->password_fxp }}", (data) => {
                 // Method to be dispatched on trigger.
                 console.log(data.date);
                 let htmlMessage = '';
                 if (data.user_id === data.from) {
-                    htmlMessage = createMessageLeft(data);
+                    htmlMessage = createMessageRight(data);
                 }
                 if (data.administrator_id === data.from) {
-                    htmlMessage = createMessageRight(data);
+                    htmlMessage = createMessageLeft(data);
                 }
                 if (htmlMessage.length > 0) {
                     $("#direct-chat-messages").append(htmlMessage);
@@ -203,7 +206,7 @@
             function createMessageLeft(data) {
                 let result = '<div class="direct-chat-msg">';
                 result += '<div class="direct-chat-infos clearfix">';
-                result += '<span class="direct-chat-name float-left">' + data.user_name + '</span>';
+                result += '<span class="direct-chat-name float-left">' + data.administrator_name + '</span>';
                 result += '<span class="direct-chat-timestamp float-left ml-2">' + data.date + '</span></div>';
                 result += '<div class="direct-chat-text ml-0 mr-5">' + data.message + '</div></div>';
 
@@ -211,10 +214,10 @@
             }
 
             function createMessageRight(data) {
-                let result = '<div class="direct-chat-msg right">';
+                let result = ' <div class="direct-chat-msg right">';
                 result += '<div class="direct-chat-infos clearfix">';
                 result += '<span class="direct-chat-timestamp float-right ml-2">' + data.date + '</span>';
-                result += '<span class="direct-chat-name float-right">' + data.administrator_name + '</span></div>';
+                result += '<span class="direct-chat-name float-right">' + data.user_name + '</span></div>';
                 result += '<div class="direct-chat-text ml-5 mr-0">' + data.message + '</div></div>';
 
                 return result;
@@ -222,22 +225,19 @@
 
             // ------ робимо ajax запит на створення повідомлення
             $('#btn-submit').click(function (e) {
-                @if(session()->missing('atpId'))
-                alert('Помилка! Не обрано перевізника');
-                return;
-                @endif
+
                 if ($('#message').val().length == 0) {
                     return;
                 }
                 e.preventDefault();
                 var data = {
                     "message": $('#message').val(),
-                    "administrator_id": {{ auth()->user()->id }},
-                    "user_id": {{ session()->has('atpId')? session('atpId') : 0 }}
+                    "administrator_id": 0,
+                    "user_id": {{ auth()->user()->id }}
                 };
                 console.log(data);
                 $.ajax({
-                    url: "{{ route('manager.chat.create') }}",
+                    url: "{{ route('chat.create') }}",
                     type: "POST",
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
