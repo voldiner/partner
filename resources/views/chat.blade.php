@@ -69,19 +69,19 @@
                                 <!-- /.card-header -->
                                 <div class="card-body">
                                     <!-- Conversations are loaded here -->
-                                    <div class="direct-chat-messages" id="direct-chat-messages">
+                                    <div class="direct-chat-messages" id="direct-chat-messages" data-id="{{ $firstId }}">
                                     @if($messages)
                                         @foreach($messages as $message)
                                             @if($message->from === $message->administrator_id)
                                                 <!-- Message. Default to the left -->
-                                                    <div class="direct-chat-msg">
+                                                    <div class="direct-chat-msg" id="id{{ $message->id }}">
                                                         <div class="direct-chat-infos clearfix">
                                                             <span class="direct-chat-name float-left">{{ $message->administrator->shortName() }}</span>
                                                             <span class="direct-chat-timestamp float-left ml-2">{{ $message->getDateMessage() }}</span>
                                                         </div>
                                                         <!-- /.direct-chat-infos -->
                                                         <div class="direct-chat-text ml-0 mr-5">
-                                                            {{ $message->text }}
+                                                               {{ $message->text }}
                                                         </div>
                                                         <!-- /.direct-chat-text -->
                                                     </div>
@@ -89,14 +89,14 @@
                                             @endif
                                             @if($message->from === $message->user_id)
                                                 <!-- Message to the right -->
-                                                    <div class="direct-chat-msg right">
+                                                    <div class="direct-chat-msg right" id="id{{ $message->id }}">
                                                         <div class="direct-chat-infos clearfix">
                                                             <span class="direct-chat-timestamp float-right ml-2">{{ $message->getDateMessage() }}</span>
                                                             <span class="direct-chat-name float-right">{{ $message->user->name }}</span>
                                                         </div>
                                                         <!-- /.direct-chat-infos -->
                                                         <div class="direct-chat-text ml-5 mr-0">
-                                                            {{ $message->text }}
+                                                              {{ $message->text }}
                                                         </div>
                                                         <!-- /.direct-chat-text -->
                                                     </div>
@@ -158,6 +158,79 @@
             //Initialize Select2 Elements
             //  $('.select2').select2();
 
+            // -------------------------- scroll
+            $('#direct-chat-messages').scroll(function () {
+                console.log($('#direct-chat-messages').scrollTop());
+                if($('#direct-chat-messages').scrollTop() === 0 ){
+                    if ($('#direct-chat-messages').attr('data-id') > 0){
+                        uploadMessages();
+                    }
+                }
+            });
+
+            function uploadMessages(){
+                console.log('upload');
+                let data_to = {
+                    "first_id": $('#direct-chat-messages').attr('data-id'),
+
+                };
+                console.log(data_to);
+                $.ajax({
+                    url: "{{ route('chat.append') }}",
+                    type: "POST",
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: data_to,
+                    dataType: 'json',
+                    success: function (data) {
+                        $('#alert-valid').addClass('no-display-alert');
+                        console.log('response');
+                        console.log(data);
+                        $('#direct-chat-messages').attr('data-id', data.first_id);
+                        $.each(data.messages,function (index, value) {
+
+                            let htmlMessage = '';
+                            if (value.user_id === value.from) {
+                                htmlMessage = createMessageRight(value);
+                            }
+                            if (value.administrator_id === value.from) {
+                                htmlMessage = createMessageLeft(value);
+                            }
+                            if (htmlMessage.length > 0) {
+                                $("#direct-chat-messages").prepend(htmlMessage);
+                            }
+                        });
+                        let idLastMessage = '#id'+ data_to.first_id;
+                        console.log(idLastMessage);
+                        $('#direct-chat-messages').animate({
+                            scrollTop: $(idLastMessage).offset().top - 170  // класс объекта к которому приезжаем
+                        }, 10);
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        var http_kod = jqXHR.status;
+                        // ---- розшифровуємо тільки помилки що повертає скрипт --- //
+                        var title = 'Невідома помилка -> http kod ' + http_kod;
+                        var content = '';
+                        if (jqXHR.getResponseHeader('partner') === 'errorPartner') {
+                            if (typeof $.parseJSON(jqXHR.responseText).error !== 'undefined') {
+                                var title = $.parseJSON(jqXHR.responseText).error + ' http kod ' + http_kod;
+                            }
+                            if (typeof $.parseJSON(jqXHR.responseText).message !== 'undefined') {
+                                let massages = $.parseJSON(jqXHR.responseText).message;
+                                for (let i = 0; i < massages.length; i++) {
+                                    content += massages[i] + '<br>';
+                                }
+                            }
+                        }
+
+                        $('#alert-valid p').html(content);
+                        $('#alert-valid h5 span').html(title);
+                        $('#alert-valid').removeClass('no-display-alert');
+                    }
+                });
+            }
+
             // ---- вибір менеджера
             $('.contacts-list-info').click(function (event) {
                 let title = 'Чат з ' + this.children[0].firstChild.data;
@@ -166,17 +239,16 @@
                 $('#direct-chat').removeClass('direct-chat-contacts-open');
             });
 
-
-            // do not send form on key press ENTER
+            // ------------------------- do not send form on key press ENTER
             $('#send-message').keydown(function (event) {
                 if (event.keyCode == 13) {
                     event.preventDefault();
                     return false;
                 }
             });
-            // ---- scroll messages to down
+            // ------------------------- scroll messages to down
             $('#direct-chat-messages').animate({scrollTop: $("#direct-chat-messages")[0].scrollHeight}, 100);
-            // --- pusher
+            // ------------------------- pusher
             var pusher = new Pusher(
                 "{{ env('PUSHER_APP_KEY') }}",
                 {
@@ -187,7 +259,6 @@
 
             channel.bind("{{ auth()->user()->password_fxp }}", (data) => {
                 // Method to be dispatched on trigger.
-                console.log(data.date);
                 let htmlMessage = '';
                 if (data.user_id === data.from) {
                     htmlMessage = createMessageRight(data);
@@ -204,7 +275,7 @@
             });
 
             function createMessageLeft(data) {
-                let result = '<div class="direct-chat-msg">';
+                let result = '<div class="direct-chat-msg" id="id'+data.id +'">';
                 result += '<div class="direct-chat-infos clearfix">';
                 result += '<span class="direct-chat-name float-left">' + data.administrator_name + '</span>';
                 result += '<span class="direct-chat-timestamp float-left ml-2">' + data.date + '</span></div>';
@@ -214,7 +285,7 @@
             }
 
             function createMessageRight(data) {
-                let result = ' <div class="direct-chat-msg right">';
+                let result = ' <div class="direct-chat-msg right" id="id'+data.id +'">';
                 result += '<div class="direct-chat-infos clearfix">';
                 result += '<span class="direct-chat-timestamp float-right ml-2">' + data.date + '</span>';
                 result += '<span class="direct-chat-name float-right">' + data.user_name + '</span></div>';
@@ -235,7 +306,7 @@
                     "administrator_id": 0,
                     "user_id": {{ auth()->user()->id }}
                 };
-                console.log(data);
+
                 $.ajax({
                     url: "{{ route('chat.create') }}",
                     type: "POST",
@@ -246,9 +317,6 @@
                     dataType: 'json',
                     success: function (data) {
                         $('#alert-valid').addClass('no-display-alert');
-                        //console.log('response');
-                        //console.log(data);
-
 
                     },
                     error: function (jqXHR, textStatus, errorThrown) {

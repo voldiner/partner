@@ -50,6 +50,7 @@ Route::middleware(['auth:web', 'verifiedEmail'])->group(function (){
    // --- chat
     Route::get('chat', [\App\Http\Controllers\MessageController::class, 'index'])->name('chat');
     Route::post('chat/create', [\App\Http\Controllers\MessageController::class, 'createMessage'])->name('chat.create');
+    Route::post('chat/append', [\App\Http\Controllers\MessageController::class, 'getMessages'])->name('chat.append');
 //    Route::any('/logout', [AuthenticatedSessionController::class, 'destroy'])
 //        ->name('logout');
 });

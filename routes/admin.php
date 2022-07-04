@@ -37,6 +37,7 @@ Route::middleware('auth:admin')->group(function (){
     // --- chat
     Route::get('chat', [\App\Http\Controllers\Admin\MessageController::class, 'index'])->name('chat');
     Route::post('chat/create', [\App\Http\Controllers\Admin\MessageController::class, 'createMessage'])->name('chat.create');
+    Route::post('chat/append', [\App\Http\Controllers\Admin\MessageController::class, 'getMessages'])->name('chat.append');
 });
 
 
