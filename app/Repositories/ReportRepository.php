@@ -71,9 +71,9 @@ class ReportRepository
         $stations = Station::all();
 
         $users = User::where('user_type', 1)
-            ->select(['id', 'name', 'kod_fxp'])
-            ->get()
-            ->toBase();
+            ->select(['id', 'kod_fxp','children_id'])
+            ->get();
+            //->toBase();
 
         while ($record = $table->nextRecord()) {
 
@@ -179,14 +179,32 @@ class ReportRepository
      */
     protected function getUserId($users, $record)
     {
-        $user = $users->firstWhere('kod_fxp', '=', $record->get('katp'));
-        if ($user) {
-            $result = $user->id;
-        } else {
-            $result = 0;
-            $this->warnings[] = 'Error not found user_id ' . $record->get('katp') . ' report #' . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
-            //dump(" Error not found user_id " . $record->get('katp') . " report #" . $record->get('nved'));
+        $result = 0;
+        $kod_vopas = $record->get('katp');
+        foreach ($users as $user){
+            if ($user->kod_fxp == $kod_vopas){
+                $result = $user->id;
+                break;
+            }elseif (!is_null($user->children_id)){
+                if (in_array($kod_vopas, $user->children_id)){
+                    $result = $user->id;
+                    break;
+                }
+            }
         }
+
+        //$user = $users->firstWhere('kod_fxp', '=', $record->get('katp'));
+        //if ($user) {
+        //    $result = $user->id;
+        //} else {
+        //    $result = 0;
+        //    $this->warnings[] = 'Error not found user_id ' . $record->get('katp') . ' report #' . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
+        //    //dump(" Error not found user_id " . $record->get('katp') . " report #" . $record->get('nved'));
+        //}
+        if ($result === 0){
+            $this->warnings[] = 'Error not found user_id ' . $record->get('katp') . ' report #' . $record->get('nved') . ' код АС ' . $record->get('kod_ac');
+        }
+
         return $result;
     }
 

@@ -46,6 +46,7 @@ class CreateUsersTable extends Migration
             $table->string('telephone')->nullable()->comment('телефон');
             $table->string('edrpou')->nullable()->comment('код едрпоу');
             $table->text('statistic')->nullable()->comment('json statistic');
+            $table->text('children_id')->nullable()->comment('коди звязаних контрагентів');
 
         });
     }

@@ -147,6 +147,17 @@ class UserController extends Controller
                 $user->date_contract = $record->get('data_d');
                 $user->telephone = $record->get('telefon');
                 $user->edrpou = $record->get('inkod');
+                $children = [];
+                for ($x=1; $x<=10; $x++){
+                    $name_field = "child{$x}";
+                    $value_child = $record->get($name_field);
+                    if ($value_child > 0){
+                        $children[] = $value_child;
+                    }
+                }
+                if (count($children) > 0){
+                    $user->children_id = $children;
+                }
 
                 $user->save();
                 $countUsers++;

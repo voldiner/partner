@@ -117,7 +117,8 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'statistic' => 'array'
+        'statistic' => 'array',
+        'children_id' => 'array'
     ];
 
     public function invoices()
