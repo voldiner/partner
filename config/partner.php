@@ -18,10 +18,10 @@
    | директорія, куди завантажуються по FTP файли
    |--------------------------------------------------------------------------
     */
-     'download_users_file' => storage_path('app/downloads/users.dbf'),
-     'download_invoices_file' => 'invoices.dbf',
-     'download_products_file' => 'products.dbf',
-     'download_retentions_file' => 'retents.dbf',
+     'download_users_file' => 'USERS.DBF',
+     'download_invoices_file' => 'INVOICES.DBF',
+     'download_products_file' => 'PRODUCTS.DBF',
+     'download_retentions_file' => 'RETENTS.DBF',
 
      /*
     |--------------------------------------------------------------------------

@@ -11,7 +11,9 @@ class IndexController extends Controller
 {
     public function index()
     {
-        $users = User::where('user_type', '=', 1)->pluck('id', 'short_name');
+        $users = User::where('user_type', '=', 1)
+            ->where('is_active', '=', 1)
+            ->pluck('id', 'short_name');
         $users->put('не вказано', 0);
         return view('admin.dashboard', compact(
             'users'
@@ -45,7 +47,9 @@ class IndexController extends Controller
 
     public function readLogs(Request $request)
     {
-        $users = User::where('user_type', '=', 1)->pluck('id', 'short_name');
+        $users = User::where('user_type', '=', 1)
+            ->where('is_active', '=', 1)
+            ->pluck('id', 'short_name');
         $users->put('не вказано', 0);
         $log = [];
         $nameLog = '';

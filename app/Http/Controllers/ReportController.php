@@ -53,7 +53,7 @@ class ReportController extends Controller
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
-     *  приклад виклику http://partner:81/reports/create?fileReports=reports1.dbf&filePlaces=places1.dbf
+     *  приклад виклику http://partner:81/reports/create?fileReports=reports01.dbf&filePlaces=places01.dbf
      */
     public function createReports(
         Request $request,
@@ -95,7 +95,7 @@ class ReportController extends Controller
             $loggingRepository->createReportsLoggingMessages($reportRepository->warnings);
             $messageStat = $reportRepository->statistic();
             $toResponce = $reportRepository->createDataResponce($message . $messageStat, $reportRepository->warnings);
-
+            $loggingRepository->createReportsLoggingMessage($messageStat);
             $notificationRepository->createReportsNotification($reportRepository->warnings, $message . $messageStat);
 
             $reportRepository->moveToArchive(

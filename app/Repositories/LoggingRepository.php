@@ -41,4 +41,9 @@ class LoggingRepository
     {
         Log::channel('send_invoices')->debug($message);
     }
+
+    public function createUsersLoggingMessage(string $message)
+    {
+        Log::channel('download_users')->debug($message);
+    }
 }

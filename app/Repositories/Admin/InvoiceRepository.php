@@ -136,6 +136,7 @@ class InvoiceRepository extends Repository
     public function getUsersToSelect()
     {
         $users = User::where('user_type', '=', 1)
+            ->where('is_active', '=', 1)
             ->pluck('id', 'short_name');
         $users->prepend(0, 'не вказано');
         return $users;

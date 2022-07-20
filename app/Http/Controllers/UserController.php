@@ -6,9 +6,12 @@ use App\Http\Requests\ChangeUserEmailRequest;
 use App\Http\Requests\ChangeUserPasswordRequest;
 use App\Http\Requests\UserEditRequest;
 use App\Models\User;
+use App\Repositories\LoggingRepository;
+use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Str;
 use XBase\TableReader;
 
@@ -91,18 +94,19 @@ class UserController extends Controller
         return redirect()->back()->with(['error' => 'Помилка зміни пароля']);
     }
 
-    public function createUsers()
+    public function createUsers(UserRepository $userRepository, LoggingRepository $loggingRepository)
     {
-        $namefile = config('partner.download_users_file');
+        $usersFile = config('partner.download_users_file', 'USERS.DBF');
+        $namefile = 'downloads/' . $usersFile;
 
-        if (!file_exists($namefile)) {
+        if (Storage::missing($namefile)) {
             Log::channel('download_users')->debug($namefile . ' not exist');
             return response()->json(['error' => $namefile . ' not exist'], 404);
         }
 
         try{
             $table = new TableReader(
-                $namefile,
+                storage_path('app/' . $namefile),
                 [
                     'encoding' => 'cp866'
                 ]
@@ -112,7 +116,23 @@ class UserController extends Controller
             $countUsers = 0;
             $countNoCod = 0;
             while ($record = $table->nextRecord()) {
-                if (User::where('kod_fxp', $record->get('kod'))->first()){
+                $oldUser = User::where('kod_fxp', $record->get('kod'))->first();
+                if ($oldUser){
+                    //  у існуючого перевізника може змінитися список дочірніх
+                    $children = [];
+                    for ($x=1; $x<=10; $x++){
+                        $name_field = "child{$x}";
+                        $value_child = $record->get($name_field);
+                        if ($value_child > 0){
+                            $children[] = $value_child;
+                        }
+                    }
+                    if (count($children) > 0){
+                        $oldUser->children_id = $children;
+                    }else{
+                        $oldUser->children_id = null;
+                    }
+                    $oldUser->save();
                     continue;
                 }
 
@@ -161,11 +181,17 @@ class UserController extends Controller
 
                 $user->save();
                 $countUsers++;
-
             }
 
             Log::channel('download_users')->debug("Create {$countUsers} users");
-            return response()->json(['success' => "Create {$countUsers} users"], 200);
+
+            $archiveMessage = $userRepository->moveToArchive(
+                $namefile,
+                $usersFile,
+                $loggingRepository
+            );
+            $returnMessage = "Create {$countUsers} users " . ($archiveMessage ? $archiveMessage : '');
+            return response()->json(['success' => $returnMessage], 200);
 
         }catch (\Exception $e){
             Log::channel('download_users')->debug($e->getMessage());
