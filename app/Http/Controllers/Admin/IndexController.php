@@ -9,7 +9,7 @@ use Carbon\Carbon;
 
 class IndexController extends Controller
 {
-    public function index()
+   /* public function index()
     {
         $users = User::where('user_type', '=', 1)
             ->where('is_active', '=', 1)
@@ -43,7 +43,7 @@ class IndexController extends Controller
         session(['atpName' => $atp->full_name]);
 
         return back();
-    }
+    }*/
 
     public function readLogs(Request $request)
     {
@@ -53,7 +53,6 @@ class IndexController extends Controller
         $users->put('не вказано', 0);
         $log = [];
         $nameLog = '';
-        //dd($request->get('date-day'));
         if ($request->has(['date-day', 'nameLog'])) {
             $fileName = storage_path('logs/' . $request->get('nameLog'));
             if (file_exists($fileName)) {
@@ -63,7 +62,6 @@ class IndexController extends Controller
             }
             //  відбір по даті 2022-05-04 треба   29/05/2022 - є
             $dateSelection = $this->createDate($request->get('date-day'));
-            //dd($dateSelection);
             foreach ($logAll as $line) {
                 if (str_contains($line, $dateSelection)) {
                     $log[] = $line;

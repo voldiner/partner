@@ -50,11 +50,6 @@ class InvoiceController extends Controller
             abort(404);
         }
 
-        /* if (session()->has('atpId')){
-             if ($invoice->user_id !== session('atpId')) {
-                 abort(403);
-             }
-         }*/
 
         $monthsFromSelect = $invoiceRepository->monthsFromSelect;
 
@@ -119,7 +114,6 @@ class InvoiceController extends Controller
                 'monthsFromSelect'
             ))->save($nameFile);
 
-             //sleep(10);
 
              $transfer = $invoiceRepository->sendPdfToPartner($nameFile);
 

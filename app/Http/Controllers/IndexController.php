@@ -34,8 +34,5 @@ class IndexController extends Controller
     {
         return view('privacypolicy');
     }
-//    public function welcome401()
-//    {
-//        return view('errors.401');
-//    }
+
 }

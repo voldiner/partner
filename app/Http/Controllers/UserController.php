@@ -5,75 +5,60 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ChangeUserEmailRequest;
 use App\Http\Requests\ChangeUserPasswordRequest;
 use App\Http\Requests\UserEditRequest;
-use App\Models\User;
 use App\Repositories\LoggingRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
-use Str;
-use XBase\TableReader;
+
+
 
 class UserController extends Controller
 {
 
-    public function index()
-    {
-
-    }
-
-    public function show($id)
-    {
-
-    }
-    public function edit(Request $request)
+    public function edit(Request $request, UserRepository $userRepository)
     {
         $user = auth()->user();
-        if (!$user){
+        if (!$user) {
             return redirect()->route('welcome');
         }
-        $user->pdv_checkbox = $user->is_pdv ? 'checked' : '';
-        $tab = $request->get('tab')?? '1';
-        if (!in_array($tab, ['1','2','3'])){
-            $tab = '1';
-        }
+
+        $userRepository->setUserValueCheckBox($user);
+
+        $tab = $userRepository->setNumberTab($request);
+
         return view('profile', compact('user', 'tab'));
     }
 
-    public function update(UserEditRequest $request)
+    public function update(
+        UserEditRequest $request,
+        UserRepository $userRepository,
+        LoggingRepository $loggingRepository
+    )
     {
         $user = auth()->user();
 
-        $user->full_name = $request->get('full_name');
-        $user->short_name = $request->get('short_name');
-        $user->insurer = $request->get('insurer');
-        $user->surname = $request->get('surname');
-        $user->identifier = $request->get('identifier');
-        $user->address = $request->get('address');
-        $user->is_pdv = $request->get('is_pdv') === 'checked' ? 1 : 0;
-        $user->certificate = $request->get('certificate');
-        $user->certificate_tax = $request->get('certificate_tax');
-        $user->telephone = $request->get('telephone');
-        $user->edrpou = $request->get('edrpou');
+        $result = $userRepository->updateUser($user, $request);
 
-        $result = $user->save();
-        if ($result){
-            Log::channel('edit_users')->debug("Change fields {$user->name} success");
+        if ($result) {
+            $loggingRepository->EditUserLoggingMessage("Change fields {$user->name} success");
             return back()->with(['success' => 'Реквізити успішно оновлено']);
         }
 
         return redirect()->back()->with(['error' => 'Помилка зміни реквізитів']);
     }
 
-    public function changeEmail(ChangeUserEmailRequest $request)
+    public function changeEmail(
+        ChangeUserEmailRequest $request,
+        UserRepository $userRepository,
+        LoggingRepository $loggingRepository
+    )
     {
         $user = auth()->user();
-        $user->email = $request->email;
-        $user->email_verified_at = null;
-        $result = $user->save();
-        if ($result){
-            Log::channel('edit_users')->debug("Change email {$user->name} to {$user->mail}");
+
+        $result = $userRepository->changeUserEmail($user, $request->email);
+        if ($result) {
+            $loggingRepository->EditUserLoggingMessage("Change email {$user->name} to {$user->mail}");
             auth()->logout();
             return redirect()->route('welcome');
         }
@@ -81,13 +66,18 @@ class UserController extends Controller
         return redirect()->back()->with(['error' => 'Помилка зміни email']);
     }
 
-    public function changePassword(ChangeUserPasswordRequest $request)
+    public function changePassword(
+        ChangeUserPasswordRequest $request,
+        UserRepository $userRepository,
+        LoggingRepository $loggingRepository
+    )
     {
         $user = auth()->user();
-        $user->password = bcrypt($request->new_password);
-        $result = $user->save();
-        if ($result){
-            Log::channel('edit_users')->debug("Change password {$user->name}");
+
+        $result = $userRepository->changeUserPassword($user, $request->new_password);
+
+        if ($result) {
+            $loggingRepository->EditUserLoggingMessage("Change password {$user->name}");
             auth()->logout();
             return redirect()->route('welcome');
         }
@@ -100,101 +90,26 @@ class UserController extends Controller
         $namefile = 'downloads/' . $usersFile;
 
         if (Storage::missing($namefile)) {
-            Log::channel('download_users')->debug($namefile . ' not exist');
+            $loggingRepository->createUsersLoggingMessage($namefile . ' not exist');
             return response()->json(['error' => $namefile . ' not exist'], 404);
         }
 
-        try{
-            $table = new TableReader(
-                storage_path('app/' . $namefile),
-                [
-                    'encoding' => 'cp866'
-                ]
-            );
+        try {
 
-            //throw new \Exception('Testing exception!!!');
-            $countUsers = 0;
-            $countNoCod = 0;
-            while ($record = $table->nextRecord()) {
-                $oldUser = User::where('kod_fxp', $record->get('kod'))->first();
-                if ($oldUser){
-                    //  у існуючого перевізника може змінитися список дочірніх
-                    $children = [];
-                    for ($x=1; $x<=10; $x++){
-                        $name_field = "child{$x}";
-                        $value_child = $record->get($name_field);
-                        if ($value_child > 0){
-                            $children[] = $value_child;
-                        }
-                    }
-                    if (count($children) > 0){
-                        $oldUser->children_id = $children;
-                    }else{
-                        $oldUser->children_id = null;
-                    }
-                    $oldUser->save();
-                    continue;
-                }
+            $userRepository->createUsers($namefile);
 
-                if (!is_numeric($record->get('kod')) || $record->get('kod') == 0){
-                    $countNoCod++;
-                    continue;
-                }
-                $user = new User();
-
-                $user->name = str_replace(['i','I'], ['і', 'І'], $record->get('nazva'));
-
-                $user->user_type = 1 ;  // перевізник
-                $user->is_active = true;
-                $user->password_fxp = Str::random(20);
-                $user->kod_fxp = $record->get('kod');
-                $user->full_name = str_replace(['i','I'], ['і', 'І'], $record->get('nazva'));
-                $user->short_name = str_replace(['i','I'], ['і', 'І'], $record->get('nazva_k'));
-                $user->percent_retention_tariff = $record->get('proc');
-                $user->percent_retention__insurance = $record->get('procself');
-                $user->percent_retention__insurer = $record->get('procgarn');
-                $user->percent_retention__baggage = $record->get('proc_bag');
-                $user->attribute = $record->get('prz');
-                $user->collection = $record->get('dog') == 1 ? true : false;
-                $user->insurer = $record->get('name_strax');
-                $user->surname = $record->get('fio');
-                $user->identifier = $record->get('inkod');
-                $user->address = $record->get('adress');
-                $user->is_pdv = $record->get('pdv') == 1 ? true : false;
-                $user->certificate = $record->get('n_svid');
-                $user->certificate_tax = $record->get('ind_pod_n');
-                $user->num_contract = $record->get('nomer_d');
-                $user->date_contract = $record->get('data_d');
-                $user->telephone = $record->get('telefon');
-                $user->edrpou = $record->get('inkod');
-                $children = [];
-                for ($x=1; $x<=10; $x++){
-                    $name_field = "child{$x}";
-                    $value_child = $record->get($name_field);
-                    if ($value_child > 0){
-                        $children[] = $value_child;
-                    }
-                }
-                if (count($children) > 0){
-                    $user->children_id = $children;
-                }
-
-                $user->save();
-                $countUsers++;
-            }
-
-            Log::channel('download_users')->debug("Create {$countUsers} users");
+            $loggingRepository->createUsersLoggingMessage("Create {$userRepository->countUsers} users. Wrong kod {$userRepository->countNoCod } users.");
 
             $archiveMessage = $userRepository->moveToArchive(
                 $namefile,
                 $usersFile,
                 $loggingRepository
             );
-            $returnMessage = "Create {$countUsers} users " . ($archiveMessage ? $archiveMessage : '');
+            $returnMessage = "Create {$userRepository->countUsers} users. Wrong kod {$userRepository->countNoCod } users. " . ($archiveMessage ? $archiveMessage : '');
             return response()->json(['success' => $returnMessage], 200);
 
-        }catch (\Exception $e){
-            Log::channel('download_users')->debug($e->getMessage());
+        } catch (\Exception $e) {
+            $loggingRepository->createUsersLoggingMessage($e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
         }
 

@@ -71,7 +71,7 @@ class ReportRepository
         $stations = Station::all();
 
         $users = User::where('user_type', 1)
-            -where('is_active', '=', 1)
+            ->where('is_active', '=', 1)
             ->select(['id', 'kod_fxp','children_id'])
             ->get();
             //->toBase();
